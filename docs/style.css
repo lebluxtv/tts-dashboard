@@ -1,167 +1,174 @@
-body {
-    background: #191b1e;
-    margin: 0;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', 'monospace', monospace;
-    color: #e5e7eb;
-    min-height: 100vh;
+:root {
+    --bg: #1a1c1f;
+    --panel: #23262b;
+    --highlight: #0ff8de;
+    --accent: #ffef61;
+    --chatbg: #20232a;
+    --border: #303136;
+    --text: #d0e5e7;
 }
-.dashboard-main {
-    max-width: 95vw;
-    width: 1600px;
-    min-width: 900px;
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+}
+
+body {
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.dashboard-vertical {
+    width: 95vw;
+    max-width: 1550px;
     margin: 24px auto;
     padding: 0;
-    background: none;
-}
-header {
-    background: #22242a;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 4px 32px #000a;
-    padding: 28px 32px 16px 32px;
+    background: transparent;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    height: 95vh;
 }
-h1 {
-    color: #14ffe9;
-    margin: 0 0 10px 0;
-    font-size: 2.1rem;
+
+header h1 {
+    font-size: 2rem;
+    color: var(--highlight);
+    margin: 0 0 8px 0;
     letter-spacing: 1px;
 }
-#status-dot {
-    margin-left: 8px;
-    vertical-align: middle;
-}
-.session-controls, .timeline-controls {
-    margin: 10px 0 0 0;
-    display: flex;
-    gap: 16px;
-}
-.session-controls button,
-.file-btn {
-    background: #23242a;
-    color: #edeef1;
-    border: none;
-    border-radius: 7px;
-    padding: 8px 18px;
-    font-size: 1rem;
-    margin-right: 10px;
-    cursor: pointer;
-    transition: background 0.15s;
-    font-family: inherit;
-    box-shadow: 0 2px 6px #0005;
-}
-.session-controls button:hover,
-.file-btn:hover {
-    background: #222e2a;
-}
-.file-btn input { display: none; }
 
+#status-dot {
+    width: 14px; height: 14px; margin-left: 8px;
+    border-radius: 50%; background: #eb4444;
+    display: inline-block; vertical-align: middle;
+    box-shadow: 0 0 4px #c40;
+}
+#status-dot.online { background: #41ff79; }
+
+.dashboard-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.dashboard-controls > * {
+    margin-right: 8px;
+}
+.file-btn { cursor: pointer; }
 .timeline-controls {
-    margin-top: 12px;
+    display: inline-flex;
+    gap: 4px;
 }
 .timeline-controls button {
-    background: #23242a;
-    border: none;
-    border-radius: 7px;
-    color: #14ffe9;
-    padding: 6px 16px;
-    margin-right: 8px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: #20232a;
+    border: 1px solid #333;
+    color: var(--highlight);
     cursor: pointer;
-    font-size: 1rem;
-    font-family: inherit;
     transition: background 0.12s;
+    font-size: 1rem;
 }
 .timeline-controls button.active,
 .timeline-controls button:focus {
-    background: #14ffe9;
-    color: #191b1e;
+    background: var(--highlight);
+    color: #111;
+    outline: none;
 }
 
-main {
+.dashboard-main {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    background: #22242a;
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 4px 32px #000a;
-    padding: 28px 32px 32px 32px;
+    height: 100%;
+    gap: 0;
 }
 
 .timeline-section {
-    width: 100%;
-    margin: 0 auto;
+    flex: 1 1 50%;
+    background: var(--panel);
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 4px 32px 0 #101315c5;
+    margin-bottom: 0;
+    padding: 14px 16px 0 16px;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
 }
 .oscillo-labels {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 4px;
-    color: #7bdaff;
-    font-size: 1.1rem;
+    margin-bottom: 2px;
+    font-size: 1.08rem;
     letter-spacing: 0.5px;
+    color: var(--highlight);
+    display: flex;
+    gap: 20px;
 }
-
 #oscilloscope {
-    width: 100%;
+    width: 100% !important;
     min-width: 700px;
-    height: 190px;
-    background: #1b1d21;
-    border-radius: 13px;
-    box-shadow: 0 4px 18px #0008;
+    max-width: 100vw;
+    height: 220px !important;
+    background: #191b1d;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 24px #0007;
     display: block;
 }
 
 .chat-section {
-    width: 100%;
-    margin-top: 16px;
-}
-#chat-log {
-    width: 100%;
-    min-height: 150px;
-    max-height: 370px;
-    background: #20222a;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px #0007;
-    overflow-y: auto;
-    padding: 14px 18px;
-    font-size: 1.14rem;
-    color: #e9eaea;
-    line-height: 1.5;
+    flex: 1 1 45%;
+    background: var(--panel);
+    border-radius: 0 0 16px 16px;
     margin-top: 0;
-    font-family: inherit;
+    min-height: 170px;
+    max-height: 100%;
+    padding: 0 18px 16px 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-log {
+    background: var(--chatbg);
+    border-radius: 10px;
+    margin-top: 12px;
+    padding: 12px 15px 10px 10px;
+    font-size: 1.13rem;
+    color: var(--text);
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    box-shadow: 0 0 10px #0003;
+    display: flex;
+    flex-direction: column;
+    /* Les messages du chat en haut */
+    justify-content: flex-start;
 }
 
 .chat-msg {
-    margin-bottom: 6px;
-    word-break: break-word;
+    margin-bottom: 2px;
+    white-space: pre-wrap;
 }
-.chat-usr {
-    color: #14ffe9;
-    font-weight: bold;
-}
-.chat-tts {
-    background: #183e3b;
-    border-radius: 6px;
-    padding: 2px 9px;
-    margin-bottom: 4px;
-    display: inline-block;
+.chat-usr { color: var(--highlight); }
+.chat-msg.chat-tts {
+    background: #182431;
+    border-left: 4px solid var(--accent);
+    padding-left: 8px;
+    border-radius: 3px;
+    color: #ffe791;
 }
 
-@media (max-width: 1000px) {
-    .dashboard-main {
-        width: 98vw;
-        min-width: unset;
-        padding: 4px;
+@media (max-width: 900px) {
+    .dashboard-vertical {
+        max-width: 99vw;
+        width: 99vw;
     }
-    main, header {
-        padding: 16px;
-    }
-    #oscilloscope {
-        min-width: unset;
-        width: 98vw;
-    }
-    #chat-log {
-        font-size: 1rem;
-        padding: 10px 8px;
-    }
+    #oscilloscope { min-width: 99vw; }
 }
