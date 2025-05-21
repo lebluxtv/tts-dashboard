@@ -31,13 +31,14 @@ const eventFeed = document.getElementById('event-feed');
 
 // --- Graph Setup (Smoothie Charts) ---
 function resizeOscillo() {
-    oscillo.width = oscillo.parentElement.offsetWidth;
-    oscillo.height = oscillo.parentElement.offsetHeight;
+    const timelineSection = document.querySelector('.timeline-section');
+    const oscillo = document.getElementById('oscilloscope');
+    // Récupère largeur et hauteur de la section (padding/marges retirés)
+    oscillo.width = timelineSection.clientWidth;
+    oscillo.height = timelineSection.clientHeight;
 }
 window.addEventListener('resize', resizeOscillo);
-
-oscillo.width = oscillo.parentElement.offsetWidth;
-oscillo.height = 350;
+resizeOscillo();
 
 const smoothie = new SmoothieChart({
     millisPerPixel: 60,
