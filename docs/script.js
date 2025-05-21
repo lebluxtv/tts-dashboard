@@ -49,63 +49,78 @@ client.on('Broadcast.Custom', ({ event, data }) => {
     handleCustomEvent(data);
 });
 
-// Fonction unique de traitement
+// --- Handler principal sécurisé ---
 function handleCustomEvent(data) {
-    if (!data?.widget) return;
+    try {
+        if (!data?.widget) return;
 
-    if (data.widget === "tts-catcher") {
-        chatBuffer.push({
-            time: data.time,
-            user: data.user,
-            message: data.message,
-            eligible: data.isEligible
-        });
-        if (chatBuffer.length > maxChat) chatBuffer.shift();
-        eventsBuffer.push({
-            type: 'chat',
-            time: data.time,
-            user: data.user,
-            message: data.message
-        });
-        if (eventsBuffer.length > 1000) eventsBuffer.shift();
-        renderChat();
-    }
+        console.log("[HANDLE] Event reçu :", data);
 
-    else if (data.widget === "tts-reader-selection") {
-        setTtsHeader(data.selectedUser, data.message, data.time);
-        ttsPanel.classList.remove('twitch-tts-glow', 'fade');
-        void ttsPanel.offsetWidth;
-        ttsPanel.classList.add('twitch-tts-glow');
-        setTimeout(() => ttsPanel.classList.add('fade'), 10);
-        setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow', 'fade'), 3010);
+        if (data.widget === "tts-catcher") {
+            chatBuffer.push({
+                time: data.time,
+                user: data.user,
+                message: data.message,
+                eligible: data.isEligible
+            });
+            if (chatBuffer.length > maxChat) chatBuffer.shift();
 
-        chatBuffer.push({
-            time: data.time,
-            user: data.selectedUser,
-            message: data.message,
-            eligible: true,
-            isTTS: true
-        });
-        if (chatBuffer.length > maxChat) chatBuffer.shift();
-        renderChat();
+            eventsBuffer.push({
+                type: 'chat',
+                time: data.time,
+                user: data.user,
+                message: data.message
+            });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
 
-        eventsBuffer.push({
-            type: 'tts',
-            time: data.time,
-            user: data.selectedUser,
-            message: data.message
-        });
-        if (eventsBuffer.length > 1000) eventsBuffer.shift();
+            renderChat();
+        }
+        else if (data.widget === "tts-reader-selection") {
+            setTtsHeader(data.selectedUser, data.message, data.time);
+            ttsPanel.classList.remove('twitch-tts-glow', 'fade');
+            void ttsPanel.offsetWidth;
+            ttsPanel.classList.add('twitch-tts-glow');
+            setTimeout(() => ttsPanel.classList.add('fade'), 10);
+            setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow', 'fade'), 3010);
 
-        console.log("🔊 TTS ajouté au graph :", data.selectedUser, data.message);
-    }
+            chatBuffer.push({
+                time: data.time,
+                user: data.selectedUser,
+                message: data.message,
+                eligible: true,
+                isTTS: true
+            });
+            if (chatBuffer.length > maxChat) chatBuffer.shift();
+            renderChat();
 
-    else if (data.widget === "tts-reader-tick") {
-        eventsBuffer.push({ type: 'tick', time: data.time });
-        if (eventsBuffer.length > 1000) eventsBuffer.shift();
-        console.log("⏱ Tick reçu pour le graph :", data.time);
+            eventsBuffer.push({
+                type: 'tts',
+                time: data.time,
+                user: data.selectedUser,
+                message: data.message
+            });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        }
+        else if (data.widget === "tts-reader-tick") {
+            eventsBuffer.push({ type: 'tick', time: data.time });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        }
+
+    } catch (err) {
+        console.error("❌ Erreur dans handleCustomEvent:", err, data);
     }
 }
+
+// --- Double écoute : Broadcast + General
+client.on('General.Custom', ({ event, data }) => {
+    console.log("[General.Custom] RECU :", data);
+    handleCustomEvent(data);
+});
+
+client.on('Broadcast.Custom', ({ event, data }) => {
+    console.log("[Broadcast.Custom] RECU :", data);
+    handleCustomEvent(data);
+});
 
 
 
