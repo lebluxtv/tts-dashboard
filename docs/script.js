@@ -10,25 +10,37 @@ const client = new StreamerbotClient({
 let chatBuffer = [];
 let maxChat = 2000;
 let eventsBuffer = [];
-let timelineMode = "scale";
+let timelineMode = "scale"; // "scale" | "adapt"
 let lastScaleSeconds = 60;
+
+let ttsTimeout = null;
+let ttsProgressInterval = null;
+let lastTtsTime = 0;
+const TTS_MAX = 3 * 60 * 1000; // 3 minutes
 
 // --- UI Selectors ---
 const chatDiv = document.getElementById('chat-log');
 const statusDot = document.getElementById('status-dot');
+const viewerCountSpan = document.getElementById('viewer-count');
 const timelineBtns = document.querySelectorAll('.timeline-controls button');
-
-// --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
+const ttsHeader = document.getElementById('tts-header');
+const ttsPanel = document.getElementById('tts-panel');
+const ttsProgress = document.querySelector('#tts-progress .bar');
+const eventFeed = document.getElementById('event-feed');
+
+// --- Graph Setup (Smoothie Charts) ---
 function resizeOscillo() {
     oscillo.width = oscillo.parentElement.offsetWidth;
-    oscillo.height = oscillo.parentElement.offsetHeight || 300;
+    oscillo.height = oscillo.parentElement.offsetHeight;
 }
 window.addEventListener('resize', resizeOscillo);
-resizeOscillo();
+
+oscillo.width = oscillo.parentElement.offsetWidth;
+oscillo.height = 350;
 
 const smoothie = new SmoothieChart({
-    millisPerPixel: 50,
+    millisPerPixel: 60,
     grid: { strokeStyle: '#233', fillStyle: '#16181c', lineWidth: 1, millisPerLine: 1000, verticalSections: 6 },
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
@@ -36,68 +48,51 @@ const smoothie = new SmoothieChart({
 const messagesLine = new TimeSeries();
 const usersLine = new TimeSeries();
 
-function getLineWidth() {
-    // thinner lines on big time windows
-    if (timelineMode === "scale") {
-        if (lastScaleSeconds > 600) return 1.3;
-        if (lastScaleSeconds > 120) return 1.7;
-        return 3;
-    } else {
-        return 2;
-    }
-}
-
-function updateSeriesStyles() {
-    smoothie.removeTimeSeries(messagesLine);
-    smoothie.removeTimeSeries(usersLine);
-    smoothie.addTimeSeries(messagesLine, {
-        strokeStyle: 'rgba(69,255,229,0.95)',
-        lineWidth: getLineWidth()
-    });
-    smoothie.addTimeSeries(usersLine, {
-        strokeStyle: 'rgba(93,170,255,0.9)',
-        lineWidth: Math.max(1, getLineWidth()-0.7),
-        lineDash: [6, 4]
-    });
-}
-updateSeriesStyles();
+smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: 2 });
+smoothie.addTimeSeries(usersLine, { strokeStyle: 'rgba(93,170,255,0.9)', lineWidth: 1, lineDash: [6,4] });
 smoothie.streamTo(oscillo, 0);
 
-// Marqueurs event sur la timeline (TTS/tick et Twitch events)
 smoothie.options.onDraw = function (chart) {
     let now = Date.now();
     let millisPerPixel = chart.options.millisPerPixel || 60;
+    let windowMillis = chart.options.duration || (chart.chartWidth * millisPerPixel);
+
+    // Events (ex: TTS, Twitch events)
     eventsBuffer.forEach(ev => {
         let t = new Date(ev.time).getTime();
         let x = chart.chartWidth - ((now - t) / millisPerPixel);
         if (x < 0 || x > chart.chartWidth) return;
-        let color = '#ffe47d';
-        let icon = '';
-        switch (ev.type) {
-            case 'tts': color = '#ffe47d'; icon = '🗣'; break;
-            case 'tick': color = '#60d6ff'; icon = '⏱'; break;
-            case 'sub': color = '#ffba40'; icon = '🌟'; break;
-            case 'giftsub': color = '#40a1ff'; icon = '🎁'; break;
-            case 'giftbomb': color = '#a040ff'; icon = '💣'; break;
-            case 'cheer': color = '#ff40a1'; icon = '💎'; break;
-            case 'follow': color = '#47ff77'; icon = '➕'; break;
-            default: color = '#b5b6ff';
+        let color = "#ffef61";
+        let iconType = ev.type;
+        switch (iconType) {
+            case "tts":      color = "#ffef61"; break;
+            case "Sub":      color = "#42b0ff"; break;
+            case "ReSub":    color = "#28e7d7"; break;
+            case "GiftSub":  color = "#ff41b0"; break;
+            case "GiftBomb": color = "#ff41b0"; break;
+            case "Follow":   color = "#a7ff8e"; break;
+            case "Cheer":    color = "#ffd256"; break;
+            default:         color = "#5daaff";
         }
         chart.chart.ctx.save();
         chart.chart.ctx.strokeStyle = color;
         chart.chart.ctx.lineWidth = 3;
-        // Ligne verticale
         chart.chart.ctx.beginPath();
-        chart.chart.ctx.moveTo(x, 7);
-        chart.chart.ctx.lineTo(x, chart.chartHeight - 8);
+        chart.chart.ctx.moveTo(x, 5);
+        chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
         chart.chart.ctx.stroke();
-        // Icone au dessus
-        chart.chart.ctx.font = "bold 19px sans-serif";
-        chart.chart.ctx.textAlign = "center";
-        chart.chart.ctx.globalAlpha = 0.86;
+
+        // Dessin icône
+        chart.chart.ctx.beginPath();
+        if (iconType === "tts") {
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
+        } else if (iconType === "Follow") {
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
+        } else {
+            chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+        }
         chart.chart.ctx.fillStyle = color;
-        chart.chart.ctx.fillText(icon, x, 22);
-        chart.chart.ctx.globalAlpha = 1;
+        chart.chart.ctx.fill();
         chart.chart.ctx.restore();
     });
 };
@@ -107,17 +102,17 @@ function updateOscLabels(msg, usr) {
     document.querySelector('.osc-users').textContent = usr;
 }
 
-// --- Alimentation de l'oscilloscope en direct ---
 setInterval(() => {
     let now = Date.now();
     let messagesLastSec = chatBuffer.filter(m =>
         new Date(m.time).getTime() > (now - 1000)
     );
     let uniqueUsers = new Set(messagesLastSec.map(m => m.user)).size;
+
     messagesLine.append(now, messagesLastSec.length);
     usersLine.append(now, uniqueUsers);
     updateOscLabels(messagesLastSec.length, uniqueUsers);
-}, 350);
+}, 400);
 
 function renderChat() {
     const isAtTop = chatDiv.scrollTop < 20;
@@ -138,47 +133,11 @@ function renderChat() {
     if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
 
-// --- TTS PANEL HEADER ---
-let ttsTimeout = null;
-function setTtsHeader(user, message, time) {
-    document.getElementById('tts-header').textContent = `[TTS] ${user} : ${message}`;
-    // Bar full, se vide en 180s
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    document.getElementById('tts-progress').innerHTML = '';
-    document.getElementById('tts-progress').appendChild(bar);
-    bar.style.width = '100%';
-    let duration = 180;
-    let t0 = Date.now();
-    function animateBar() {
-        let elapsed = (Date.now() - t0) / 1000;
-        let perc = Math.max(0, 1 - elapsed / duration);
-        bar.style.width = (perc * 100) + '%';
-        if (perc > 0) requestAnimationFrame(animateBar);
-    }
-    animateBar();
-    clearTimeout(ttsTimeout);
-    ttsTimeout = setTimeout(() => {
-        document.getElementById('tts-header').textContent = 'Aucun TTS';
-        bar.style.width = '0%';
-    }, 180 * 1000);
-}
+// Redimensionne le canvas au resize (optionnel, adaptatif)
+window.addEventListener('resize', () => {
+    oscillo.width = oscillo.parentElement.offsetWidth;
+});
 
-// --- Event Feed ---
-let eventFeedTimeout = null;
-function showEventFeed(html) {
-    const feed = document.getElementById('event-feed');
-    feed.innerHTML = html;
-    feed.classList.add('active');
-    feed.style.display = 'block';
-    clearTimeout(eventFeedTimeout);
-    eventFeedTimeout = setTimeout(() => {
-        feed.classList.remove('active');
-        setTimeout(() => { feed.style.display = 'none'; }, 350);
-    }, 30000); // 30 sec
-}
-
-// --- Timeline window (scale/adapt) ---
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
     timelineBtns.forEach(btn => btn.classList.remove('active'));
@@ -193,7 +152,6 @@ function setTimelineWindow(mode, seconds = 60) {
         if (btn) btn.classList.add('active');
         adaptTimeline();
     }
-    updateSeriesStyles();
 }
 timelineBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -212,11 +170,42 @@ function adaptTimeline() {
     let duration = maxTime - minTime;
     let px = oscillo.width;
     smoothie.options.millisPerPixel = Math.max(duration / px, 10);
-    updateSeriesStyles();
 }
-setInterval(adaptTimeline, 1200);
+setInterval(adaptTimeline, 1500);
 
-// --- Save/Load session ---
+// -- TTS Header + Progress
+function setTtsHeader(user, message, time) {
+    ttsHeader.innerHTML = `<span style="color:#a5ffef;">${user}</span> : <span>${message}</span>`;
+    lastTtsTime = Date.now();
+    updateTtsProgressBar();
+    if (ttsTimeout) clearTimeout(ttsTimeout);
+    if (ttsProgressInterval) clearInterval(ttsProgressInterval);
+
+    // Remplir la barre à fond, puis la vider en 3 min
+    ttsProgress.style.width = '100%';
+    ttsProgressInterval = setInterval(updateTtsProgressBar, 250);
+}
+
+function updateTtsProgressBar() {
+    let now = Date.now();
+    let elapsed = now - lastTtsTime;
+    let remaining = Math.max(0, TTS_MAX - elapsed);
+    let percent = Math.max(0, remaining / TTS_MAX) * 100;
+    ttsProgress.style.width = percent + '%';
+}
+
+// -- Event Feed
+function showEventFeed(msg) {
+    eventFeed.innerHTML = msg;
+    eventFeed.classList.add('show');
+    eventFeed.style.display = "block";
+    setTimeout(() => {
+        eventFeed.classList.remove('show');
+        eventFeed.style.display = "none";
+    }, 30000);
+}
+
+// -- Save/Load session
 function saveSession() {
     const data = {
         generatedAt: new Date().toISOString(),
@@ -259,17 +248,30 @@ document.getElementById('load-session').addEventListener('change', function (e) 
     reader.readAsText(file);
 });
 
-// --- WebSocket/Streamer.bot events ---
-client.on('connected', () => {
+// -- Streamer.bot Client Event Hooks --
+client.on('connected', async () => {
     statusDot.classList.remove('offline');
     statusDot.classList.add('online');
-    updateViewers();
+    // Active viewers
+    try {
+        const resp = await client.getActiveViewers();
+        if (resp && resp.viewers) {
+            viewerCountSpan.textContent = "● " + resp.viewers.length;
+            viewerCountSpan.title = resp.viewers.map(v => v.display).join(', ');
+        } else {
+            viewerCountSpan.textContent = "";
+        }
+    } catch (e) {
+        viewerCountSpan.textContent = "";
+    }
 });
 client.on('disconnected', () => {
     statusDot.classList.remove('online');
     statusDot.classList.add('offline');
-    document.getElementById('viewer-count').textContent = '';
+    viewerCountSpan.textContent = "";
 });
+
+// -- MAIN CUSTOM EVENTS: CHAT, TTS, ETC --
 client.on('General.Custom', ({ event, data }) => {
     if (data?.widget === "tts-catcher") {
         chatBuffer.push({
@@ -301,37 +303,41 @@ client.on('General.Custom', ({ event, data }) => {
     }
 });
 
-// --- Twitch events (Sub, Gift, Cheer, Follow) ---
-client.on('Twitch.Sub', ({ data }) => {
-    eventsBuffer.push({ type: 'sub', time: Date.now(), user: data.displayName });
-    showEventFeed(`<span class="event-icon event-type-sub">🌟</span> <span class="event-user">${data.displayName}</span> s’est abonné(e) !`);
-});
-client.on('Twitch.GiftSub', ({ data }) => {
-    eventsBuffer.push({ type: 'giftsub', time: Date.now(), user: data.recipientDisplayName });
-    showEventFeed(`<span class="event-icon event-type-gift">🎁</span> <span class="event-user">${data.recipientDisplayName}</span> a reçu un sub cadeau !`);
-});
-client.on('Twitch.GiftBomb', ({ data }) => {
-    eventsBuffer.push({ type: 'giftbomb', time: Date.now(), user: data.displayName, gifts: data.gifts });
-    showEventFeed(`<span class="event-icon event-type-bomb">💣</span> <span class="event-user">${data.displayName ?? "Anonyme"}</span> a offert <span class="event-amount">${data.gifts}</span> subs !`);
-});
-client.on('Twitch.Follow', ({ data }) => {
-    eventsBuffer.push({ type: 'follow', time: Date.now(), user: data.displayName });
-    showEventFeed(`<span class="event-icon event-type-follow">➕</span> <span class="event-user">${data.displayName}</span> vient de follow !`);
-});
-client.on('Twitch.Cheer', ({ data }) => {
-    eventsBuffer.push({ type: 'cheer', time: Date.now(), user: data.message.displayName, bits: data.message.bits });
-    showEventFeed(`<span class="event-icon event-type-cheer">💎</span> <span class="event-user">${data.message.displayName}</span> a envoyé <span class="event-amount">${data.message.bits}</span> bits !`);
-});
-
-// --- Viewers actifs ---
-async function updateViewers() {
+// ---- Twitch EVENTS for timeline + event feed ----
+client.ws.addEventListener('message', (message) => {
     try {
-        const response = await client.getActiveViewers();
-        document.getElementById('viewer-count').textContent = `👁 ${response.count}`;
-    } catch (e) { }
-}
-setInterval(updateViewers, 15000);
+        const json = JSON.parse(message.data);
+        // Pour la compatibilité avec la doc officielle streamer.bot
+        if (json.event && json.event.source === 'Twitch') {
+            let evt = json.event.type;
+            let label = "";
+            let timelineType = evt;
+            switch (evt) {
+                case "Sub":
+                case "ReSub":
+                    label = `<b>🟦 Nouveau SUB:</b> <span style="color:#41ffec">${json.data.displayName}</span>`;
+                    break;
+                case "GiftSub":
+                    label = `<b>🎁 Gift SUB:</b> <span style="color:#ffb4fa">${json.data.recipientDisplayName}</span>`;
+                    break;
+                case "GiftBomb":
+                    label = `<b>💣 Gift BOMB:</b> <span style="color:#ffb4fa">${json.data.displayName || 'Anonyme'}</span> (${json.data.gifts} subs)`;
+                    break;
+                case "Follow":
+                    label = `<b>🟩 Nouveau FOLLOW:</b> <span style="color:#b8ff9c">${json.data.displayName}</span>`;
+                    break;
+                case "Cheer":
+                    label = `<b>💎 CHEER:</b> <span style="color:#fff081">${json.data.message.displayName} (${json.data.message.bits} bits)</span>`;
+                    break;
+                default: return;
+            }
+            showEventFeed(label);
+            eventsBuffer.push({ type: timelineType, time: new Date().toISOString() });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        }
+    } catch (e) { /* silent */ }
+});
 
-// --- INIT ---
 setTimelineWindow("scale", 60);
+resizeOscillo();
 renderChat();
