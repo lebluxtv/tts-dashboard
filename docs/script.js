@@ -146,14 +146,20 @@ function renderChat() {
         chatDiv.innerHTML = `<div style="opacity:.5;text-align:center;">Aucun message reçu</div>`;
         return;
     }
-    chatDiv.innerHTML = chatBuffer.slice(-100).reverse().map(msg => {
-        const prefix = msg.isTTS ? `[TTS] <span class="chat-usr">${msg.user}</span> : ${msg.message}` :
-            `<span class="chat-usr">${msg.user}</span> : ${msg.message} ${msg.eligible ? "" : "<span style='opacity:0.5'>(non éligible)</span>"}`;
-        return `<div class="chat-msg ${msg.isTTS ? 'chat-tts' : ''}">${prefix}</div>`;
+
+    chatDiv.innerHTML = chatBuffer.slice(-100).map(msg => {
+        if (msg.isTTS) {
+            return `<div class="chat-msg chat-tts">[TTS] <span class="chat-usr">${msg.user}</span> : ${msg.message}</div>`;
+        }
+        return `<div class="chat-msg">
+            <span class="chat-usr">${msg.user}</span>
+            : ${msg.message} ${msg.eligible ? "" : "<span style='opacity:0.5'>(non éligible)</span>"}
+        </div>`;
     }).join('');
+
+    // 🔁 Toujours scroller à la fin pour suivre la conversation
     chatDiv.scrollTop = chatDiv.scrollHeight;
 }
-
 // --- TTS Display ---
 function setTtsHeader(user, message, time) {
     ttsHeader.innerHTML = `<span style="color:#a5ffef;">${user}</span> : <span>${message}</span>`;
