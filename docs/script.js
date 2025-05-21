@@ -289,6 +289,8 @@ client.on('General.Custom', ({ event, data }) => {
             message: data.message,
             eligible: data.isEligible
         });
+
+        eventsBuffer.push({ type: 'chat', time: data.time, user: data.user });
         if (chatBuffer.length > maxChat) chatBuffer.shift();
         renderChat();
     }
