@@ -70,11 +70,9 @@ const smoothie = new SmoothieChart({
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
 });
-const messagesLine = new TimeSeries();
-const usersLine = new TimeSeries();
 
-smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: 2 });
-smoothie.addTimeSeries(usersLine, { strokeStyle: 'rgba(93,170,255,0.9)', lineWidth: 1, lineDash: [6,4] });
+
+
 smoothie.streamTo(oscillo, 0);
 
 smoothie.options.onDraw = function (chart) {
@@ -132,17 +130,7 @@ function updateOscLabels(msg, usr) {
     document.querySelector('.osc-users').textContent = usr;
 }
 
-setInterval(() => {
-    let now = Date.now();
-    let messagesLastSec = chatBuffer.filter(m =>
-        new Date(m.time).getTime() > (now - 1000)
-    );
-    let uniqueUsers = new Set(messagesLastSec.map(m => m.user)).size;
 
-    messagesLine.append(now, messagesLastSec.length);
-    usersLine.append(now, uniqueUsers);
-    updateOscLabels(messagesLastSec.length, uniqueUsers);
-}, 400);
 
 function renderChat() {
     const isAtTop = chatDiv.scrollTop < 20;
