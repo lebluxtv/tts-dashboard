@@ -265,6 +265,73 @@ client.on('connected', async () => {
     } catch (e) {
         viewerCountSpan.textContent = "";
     }
+// ---- Twitch EVENTS for timeline + event feed ----
+client.ws.addEventListener('message', (message) => {
+    try {
+        const json = JSON.parse(message.data);
+        // Pour la compatibilité avec la doc officielle streamer.bot
+        if (json.event && json.event.source === 'Twitch') {
+            let evt = json.event.type;
+            let label = "";
+            let timelineType = evt;
+            switch (evt) {
+                case "Sub":
+                case "ReSub":
+                    label = `<b>🟦 Nouveau SUB:</b> <span style="color:#41ffec">${json.data.displayName}</span>`;
+                    break;
+                case "GiftSub":
+                    label = `<b>🎁 Gift SUB:</b> <span style="color:#ffb4fa">${json.data.recipientDisplayName}</span>`;
+                    break;
+                case "GiftBomb":
+                    label = `<b>💣 Gift BOMB:</b> <span style="color:#ffb4fa">${json.data.displayName || 'Anonyme'}</span> (${json.data.gifts} subs)`;
+                    break;
+                case "Follow":
+                    label = `<b>🟩 Nouveau FOLLOW:</b> <span style="color:#b8ff9c">${json.data.displayName}</span>`;
+                    break;
+                case "Cheer":
+                    label = `<b>💎 CHEER:</b> <span style="color:#fff081">${json.data.message.displayName} (${json.data.message.bits} bits)</span>`;
+                    break;
+                default: return;
+            }
+            showEventFeed(label);
+            eventsBuffer.push({ type: timelineType, time: new Date().toISOString() });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        }
+    } catch (e) { /* silent */ }
+});// ---- Twitch EVENTS for timeline + event feed ----
+client.ws.addEventListener('message', (message) => {
+    try {
+        const json = JSON.parse(message.data);
+        // Pour la compatibilité avec la doc officielle streamer.bot
+        if (json.event && json.event.source === 'Twitch') {
+            let evt = json.event.type;
+            let label = "";
+            let timelineType = evt;
+            switch (evt) {
+                case "Sub":
+                case "ReSub":
+                    label = `<b>🟦 Nouveau SUB:</b> <span style="color:#41ffec">${json.data.displayName}</span>`;
+                    break;
+                case "GiftSub":
+                    label = `<b>🎁 Gift SUB:</b> <span style="color:#ffb4fa">${json.data.recipientDisplayName}</span>`;
+                    break;
+                case "GiftBomb":
+                    label = `<b>💣 Gift BOMB:</b> <span style="color:#ffb4fa">${json.data.displayName || 'Anonyme'}</span> (${json.data.gifts} subs)`;
+                    break;
+                case "Follow":
+                    label = `<b>🟩 Nouveau FOLLOW:</b> <span style="color:#b8ff9c">${json.data.displayName}</span>`;
+                    break;
+                case "Cheer":
+                    label = `<b>💎 CHEER:</b> <span style="color:#fff081">${json.data.message.displayName} (${json.data.message.bits} bits)</span>`;
+                    break;
+                default: return;
+            }
+            showEventFeed(label);
+            eventsBuffer.push({ type: timelineType, time: new Date().toISOString() });
+            if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        }
+    } catch (e) { /* silent */ }
+});
 });
 client.on('disconnected', () => {
     statusDot.classList.remove('online');
@@ -304,40 +371,7 @@ client.on('General.Custom', ({ event, data }) => {
     }
 });
 
-// ---- Twitch EVENTS for timeline + event feed ----
-client.ws.addEventListener('message', (message) => {
-    try {
-        const json = JSON.parse(message.data);
-        // Pour la compatibilité avec la doc officielle streamer.bot
-        if (json.event && json.event.source === 'Twitch') {
-            let evt = json.event.type;
-            let label = "";
-            let timelineType = evt;
-            switch (evt) {
-                case "Sub":
-                case "ReSub":
-                    label = `<b>🟦 Nouveau SUB:</b> <span style="color:#41ffec">${json.data.displayName}</span>`;
-                    break;
-                case "GiftSub":
-                    label = `<b>🎁 Gift SUB:</b> <span style="color:#ffb4fa">${json.data.recipientDisplayName}</span>`;
-                    break;
-                case "GiftBomb":
-                    label = `<b>💣 Gift BOMB:</b> <span style="color:#ffb4fa">${json.data.displayName || 'Anonyme'}</span> (${json.data.gifts} subs)`;
-                    break;
-                case "Follow":
-                    label = `<b>🟩 Nouveau FOLLOW:</b> <span style="color:#b8ff9c">${json.data.displayName}</span>`;
-                    break;
-                case "Cheer":
-                    label = `<b>💎 CHEER:</b> <span style="color:#fff081">${json.data.message.displayName} (${json.data.message.bits} bits)</span>`;
-                    break;
-                default: return;
-            }
-            showEventFeed(label);
-            eventsBuffer.push({ type: timelineType, time: new Date().toISOString() });
-            if (eventsBuffer.length > 1000) eventsBuffer.shift();
-        }
-    } catch (e) { /* silent */ }
-});
+
 
 setTimelineWindow("scale", 60);
 resizeOscillo();
