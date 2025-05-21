@@ -20,9 +20,14 @@ const timelineBtns = document.querySelectorAll('.timeline-controls button');
 
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
-oscillo.width = oscillo.parentElement.offsetWidth; // Auto-adapte largeur
-oscillo.height = oscillo.parentElement.offsetHeight;
 
+// Fonction pour ajuster le canvas à la taille de son parent
+function resizeOscillo() {
+    oscillo.width = oscillo.parentElement.offsetWidth;
+    oscillo.height = oscillo.parentElement.offsetHeight;
+}
+window.addEventListener('resize', resizeOscillo);
+resizeOscillo();
 
 const smoothie = new SmoothieChart({
     millisPerPixel: 60,
@@ -103,11 +108,6 @@ function renderChat() {
     if (isAtTop) chatDiv.scrollTop = 0;
     if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
-
-// Redimensionne le canvas au resize (optionnel, adaptatif)
-window.addEventListener('resize', () => {
-    oscillo.width = oscillo.parentElement.offsetWidth;
-});
 
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
@@ -206,7 +206,7 @@ client.on('General.Custom', ({ event, data }) => {
         renderChat();
     }
     else if (data?.widget === "tts-reader-selection") {
-console.log("[TTS Selection]", data.selectedUser, data.message);
+        // console.log("[TTS Selection]", data.selectedUser, data.message);
         chatBuffer.push({
             time: data.time,
             user: data.selectedUser,
