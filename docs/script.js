@@ -237,6 +237,33 @@ client.on('disconnected', () => {
     statusDot.classList.remove('online');
     statusDot.classList.add('offline');
 });
+
+// --- TTS HEADER LOGIC ---
+let lastTtsTimestamp = null;
+let ttsDuration = 3 * 60 * 1000; // 3 minutes
+function setTtsHeader(user, msg, time = null) {
+    document.getElementById('tts-user').textContent = user ? `[${user}]` : "";
+    document.getElementById('tts-msg').textContent = msg || "";
+    lastTtsTimestamp = time ? new Date(time).getTime() : Date.now();
+    updateTtsTimer();
+}
+function updateTtsTimer() {
+    if (!lastTtsTimestamp) {
+        document.getElementById('tts-timerbar').style.width = "0%";
+        document.getElementById('tts-timerbar-label').textContent = "";
+        return;
+    }
+    let elapsed = Date.now() - lastTtsTimestamp;
+    let pct = Math.max(0, 100 - (elapsed / ttsDuration) * 100);
+    document.getElementById('tts-timerbar').style.width = pct + "%";
+    let remaining = Math.max(0, ttsDuration - elapsed);
+    let mins = Math.floor(remaining / 60000);
+    let secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('tts-timerbar-label').textContent = `⏳ ${mins}:${secs.toString().padStart(2, "0")} avant prochain TTS`;
+}
+setInterval(updateTtsTimer, 200);
+
+
 client.on('General.Custom', ({ event, data }) => {
     if (data?.widget === "tts-catcher") {
         chatBuffer.push({
@@ -249,7 +276,8 @@ client.on('General.Custom', ({ event, data }) => {
         renderChat();
     }
     else if (data?.widget === "tts-reader-selection") {
-        // console.log("[TTS Selection]", data.selectedUser, data.message);
+         console.log("[TTS Selection]", data.selectedUser, data.message);
+setTtsHeader(data.selectedUser, data.message, data.time);
         chatBuffer.push({
             time: data.time,
             user: data.selectedUser,
