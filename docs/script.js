@@ -3,8 +3,32 @@ const client = new StreamerbotClient({
     host: '127.0.0.1',
     port: 8080,
     endpoint: '/',
-    password: ''
+    password: '',
+    onConnect: async (data) => {
+        console.log("WebSocket connecté !", data);
+        statusDot.classList.remove('offline');
+        statusDot.classList.add('online');
+        // Active viewers
+        try {
+            const resp = await client.getActiveViewers();
+            if (resp && resp.viewers) {
+                viewerCountSpan.textContent = "● " + resp.viewers.length;
+                viewerCountSpan.title = resp.viewers.map(v => v.display).join(', ');
+            } else {
+                viewerCountSpan.textContent = "";
+            }
+        } catch (e) {
+            viewerCountSpan.textContent = "";
+        }
+    },
+    onDisconnect: () => {
+        console.log("WebSocket déconnecté !");
+        statusDot.classList.remove('online');
+        statusDot.classList.add('offline');
+        viewerCountSpan.textContent = "";
+    }
 });
+
 
 // --- Data buffers ---
 let chatBuffer = [];
@@ -249,23 +273,8 @@ document.getElementById('load-session').addEventListener('change', function (e) 
     reader.readAsText(file);
 });
 
-// -- Streamer.bot Client Event Hooks --
-client.on('connected', async () => {
-console.log("WebSocket connecté !");
-    statusDot.classList.remove('offline');
-    statusDot.classList.add('online');
-    // Active viewers
-    try {
-        const resp = await client.getActiveViewers();
-        if (resp && resp.viewers) {
-            viewerCountSpan.textContent = "● " + resp.viewers.length;
-            viewerCountSpan.title = resp.viewers.map(v => v.display).join(', ');
-        } else {
-            viewerCountSpan.textContent = "";
-        }
-    } catch (e) {
-        viewerCountSpan.textContent = "";
-    }
+
+
 // ---- Twitch EVENTS for timeline + event feed ----
 client.ws.addEventListener('message', (message) => {
     try {
@@ -301,12 +310,7 @@ client.ws.addEventListener('message', (message) => {
     } catch (e) { /* silent */ }
 });
 
-client.on('disconnected', () => {
-console.log("WebSocket déconnecté !");
-    statusDot.classList.remove('online');
-    statusDot.classList.add('offline');
-    viewerCountSpan.textContent = "";
-});
+
 
 // -- MAIN CUSTOM EVENTS: CHAT, TTS, ETC --
 client.on('General.Custom', ({ event, data }) => {
@@ -339,8 +343,6 @@ client.on('General.Custom', ({ event, data }) => {
         if (eventsBuffer.length > 1000) eventsBuffer.shift();
     }
 });
-
-
 
 setTimelineWindow("scale", 60);
 resizeOscillo();
