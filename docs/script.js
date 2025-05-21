@@ -7,17 +7,21 @@ const client = new StreamerbotClient({
 });
 
 // --- Data buffers ---
-let chatBuffer = []; // [{time, user, message, ...}]
+let chatBuffer = [];
 let maxChat = 2000;
+let eventsBuffer = [];
+let timelineMode = "scale"; // "scale" | "adapt"
+let lastScaleSeconds = 60;
 
 // --- UI Selectors ---
 const chatDiv = document.getElementById('chat-log');
 const statusDot = document.getElementById('status-dot');
+const timelineBtns = document.querySelectorAll('.timeline-controls button');
 
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
 const smoothie = new SmoothieChart({
-    millisPerPixel: 40,    // vitesse défilement (plus petit = plus rapide)
+    millisPerPixel: 60,    // 1min par 1000px par défaut (modifiable)
     grid: { strokeStyle: '#233', fillStyle: '#16181c', lineWidth: 1, millisPerLine: 1000, verticalSections: 6 },
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
@@ -25,10 +29,41 @@ const smoothie = new SmoothieChart({
 const messagesLine = new TimeSeries();
 const usersLine = new TimeSeries();
 
-// Ajoute les courbes
 smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: 3 });
 smoothie.addTimeSeries(usersLine, { strokeStyle: 'rgba(93,170,255,0.9)', lineWidth: 2, lineDash: [6,4] });
 smoothie.streamTo(oscillo, 0);
+
+// --- Marqueurs events sur la timeline (Ticks/TTS) ---
+smoothie.options.onDraw = function (chart) {
+    let now = Date.now();
+    let millisPerPixel = chart.options.millisPerPixel || 60;
+    let windowMillis = chart.options.duration || (chart.chartWidth * millisPerPixel);
+
+    eventsBuffer.forEach(ev => {
+        let t = new Date(ev.time).getTime();
+        let x = chart.chartWidth - ((now - t) / millisPerPixel);
+        if (x < 0 || x > chart.chartWidth) return;
+        let color = ev.type === 'tts' ? '#ffef61' : '#5daaff';
+        chart.chart.ctx.save();
+        chart.chart.ctx.strokeStyle = color;
+        chart.chart.ctx.lineWidth = 3;
+        // Ligne verticale
+        chart.chart.ctx.beginPath();
+        chart.chart.ctx.moveTo(x, 5);
+        chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
+        chart.chart.ctx.stroke();
+        // Icône
+        chart.chart.ctx.beginPath();
+        if (ev.type === 'tts') {
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 7, 0, 2 * Math.PI);
+        } else {
+            chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 12, 12);
+        }
+        chart.chart.ctx.fillStyle = color;
+        chart.chart.ctx.fill();
+        chart.chart.ctx.restore();
+    });
+};
 
 // Affiche la valeur en live
 function updateOscLabels(msg, usr) {
@@ -39,7 +74,6 @@ function updateOscLabels(msg, usr) {
 // --- Alimentation de l'oscilloscope en direct ---
 setInterval(() => {
     let now = Date.now();
-    // Messages de la dernière seconde
     let messagesLastSec = chatBuffer.filter(m =>
         new Date(m.time).getTime() > (now - 1000)
     );
@@ -50,11 +84,10 @@ setInterval(() => {
     updateOscLabels(messagesLastSec.length, uniqueUsers);
 }, 400);
 
-// --- Affichage chat minimal avec auto-scroll intelligent ---
+// --- Affichage chat “dernier en haut” + auto-scroll top ---
 function renderChat() {
-    const isAtBottom =
-        chatDiv.scrollHeight - chatDiv.clientHeight - chatDiv.scrollTop < 50;
-    chatDiv.innerHTML = chatBuffer.slice(-100).map(msg => {
+    const isAtTop = chatDiv.scrollTop < 20;
+    chatDiv.innerHTML = chatBuffer.slice(-100).reverse().map(msg => {
         if (msg.isTTS) {
             return `<div class="chat-msg chat-tts">[TTS] <span class="chat-usr">${msg.user}</span> : ${msg.message}</div>`;
         }
@@ -63,42 +96,13 @@ function renderChat() {
             : ${msg.message} ${msg.eligible ? "" : "<span style='opacity:0.5'>(non éligible)</span>"}
         </div>`;
     }).join('');
-    if (isAtBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
+    if (isAtTop) chatDiv.scrollTop = 0;
+    if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
 
-// --- Websocket Events ---
-client.on('connected', () => {
-    statusDot.classList.remove('offline');
-    statusDot.classList.add('online');
-});
-
-client.on('disconnected', () => {
-    statusDot.classList.remove('online');
-    statusDot.classList.add('offline');
-});
-
-client.on('General.Custom', ({ event, data }) => {
-    // Message Catcher (Chat entry)
-    if (data?.widget === "tts-catcher") {
-        chatBuffer.push({
-            time: data.time,
-            user: data.user,
-            message: data.message,
-            eligible: data.isEligible
-        });
-        if (chatBuffer.length > maxChat) chatBuffer.shift();
-        renderChat();
-    }
-    // TTS Selection
-    else if (data?.widget === "tts-reader-selection") {
-        chatBuffer.push({
-            time: data.time,
-            user: data.selectedUser,
-            message: data.message,
-            eligible: true,
-            isTTS: true
-        });
-        if (chatBuffer.length > maxChat) chatBuffer.shift();
-        renderChat();
-    }
-});
+// --- Contrôle timeline (zoom, adaptatif) ---
+function setTimelineWindow(mode, seconds = 60) {
+    timelineMode = mode;
+    timelineBtns.forEach(btn => btn.classList.remove('active'));
+    if (mode === "scale") {
+        let btn = Array
