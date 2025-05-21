@@ -11,7 +11,7 @@ const client = new StreamerbotClient({
 
         try {
             await client.subscribe('General.Custom');
-            await client.subscribe('Broadcast.Custom');
+            //await client.subscribe('Broadcast.Custom');
             console.log("📡 Subscriptions General.Custom et Broadcast.Custom envoyées.");
         } catch (err) {
             console.warn("⚠️ Abonnement manuel échoué :", err.message);
@@ -142,6 +142,8 @@ timelineBtns.forEach(btn => btn.addEventListener('click', () => {
 
 // --- Chat Rendering ---
 function renderChat() {
+    const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
+
     if (chatBuffer.length === 0) {
         chatDiv.innerHTML = `<div style="opacity:.5;text-align:center;">Aucun message reçu</div>`;
         return;
@@ -151,15 +153,13 @@ function renderChat() {
         if (msg.isTTS) {
             return `<div class="chat-msg chat-tts">[TTS] <span class="chat-usr">${msg.user}</span> : ${msg.message}</div>`;
         }
-        return `<div class="chat-msg">
-            <span class="chat-usr">${msg.user}</span>
-            : ${msg.message} ${msg.eligible ? "" : "<span style='opacity:0.5'>(non éligible)</span>"}
-        </div>`;
+        return `<div class="chat-msg"><span class="chat-usr">${msg.user}</span> : ${msg.message}${msg.eligible ? "" : " <span style='opacity:0.5'>(non éligible)</span>"}</div>`;
     }).join('');
 
-    // 🔁 Toujours scroller à la fin pour suivre la conversation
-    chatDiv.scrollTop = chatDiv.scrollHeight;
+    // Auto-scroll si on est déjà en bas
+    if (isAtBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
 }
+
 // --- TTS Display ---
 function setTtsHeader(user, message, time) {
     ttsHeader.innerHTML = `<span style="color:#a5ffef;">${user}</span> : <span>${message}</span>`;
