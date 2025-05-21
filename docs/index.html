@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>TTS Auto Message Reader - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js pour la timeline -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Client Streamer.bot -->
+    <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>TTS Auto Message Reader <span id="status-dot" class="dot offline"></span></h1>
+            <div class="range-controls">
+                <button data-range="1m">1 min</button>
+                <button data-range="5m">5 min</button>
+                <button data-range="10m" class="active">10 min</button>
+                <button data-range="30m">30 min</button>
+                <button data-range="1h">1h</button>
+                <button data-range="max">Max</button>
+            </div>
+        </header>
+        <section class="timeline-section">
+            <canvas id="timelineChart"></canvas>
+        </section>
+        <section class="chat-section">
+            <div id="chat-log"></div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
