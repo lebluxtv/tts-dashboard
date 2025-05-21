@@ -6,6 +6,9 @@ const client = new StreamerbotClient({
     password: 'streamer.bot',
     onConnect: async (data) => {
         console.log("WebSocket connecté !", data);
+ // 🔥 Force la souscription aux événements custom
+    client.subscribe('General.Custom');
+   // client.subscribe('Broadcast.Custom');
         statusDot.classList.remove('offline');
         statusDot.classList.add('online');
         // Active viewers
