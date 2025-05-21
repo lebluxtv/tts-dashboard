@@ -314,3 +314,18 @@ client.on('General.Custom', ({ event, data }) => {
 setTimelineWindow("scale", 60);
 resizeOscillo();
 renderChat();
+// --- Refresh viewers count every 10 seconds ---
+async function refreshViewers() {
+    try {
+        const resp = await client.getActiveViewers();
+        if (resp && resp.viewers) {
+            viewerCountSpan.textContent = "👀 " + resp.viewers.length;
+            viewerCountSpan.title = resp.viewers.map(v => v.display).join(', ');
+        } else {
+            viewerCountSpan.textContent = "";
+        }
+    } catch (e) {
+        viewerCountSpan.textContent = "";
+    }
+}
+setInterval(refreshViewers, 10000);
