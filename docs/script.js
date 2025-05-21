@@ -293,6 +293,16 @@ client.on('General.Custom', ({ event, data }) => {
     }
     else if (data?.widget === "tts-reader-selection") {
         setTtsHeader(data.selectedUser, data.message, data.time);
+// Bordure animée TTS
+    ttsPanel.classList.remove('twitch-tts-glow', 'fade'); // reset au cas où
+    void ttsPanel.offsetWidth; // force reflow (pour relancer l’animation si déjà active)
+    ttsPanel.classList.add('twitch-tts-glow');
+    setTimeout(() => {
+        ttsPanel.classList.add('fade');
+    }, 10); // commence à estomper immédiatement
+    setTimeout(() => {
+        ttsPanel.classList.remove('twitch-tts-glow', 'fade');
+    }, 3010); // retire tout après 3s
         chatBuffer.push({
             time: data.time,
             user: data.selectedUser,
