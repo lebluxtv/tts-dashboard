@@ -51,27 +51,70 @@ smoothie.options.onDraw = function (chart) {
         let t = new Date(ev.time).getTime();
         let x = chart.chartWidth - ((now - t) / millisPerPixel);
         if (x < 0 || x > chart.chartWidth) return;
-        let color = ev.type === 'tts' ? '#ffef61' : '#5daaff';
-        chart.chart.ctx.save();
-        chart.chart.ctx.strokeStyle = color;
-        chart.chart.ctx.lineWidth = 3;
-        // Ligne verticale
-        chart.chart.ctx.beginPath();
-        chart.chart.ctx.moveTo(x, 5);
-        chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
-        chart.chart.ctx.stroke();
-        // Icône
-        chart.chart.ctx.beginPath();
+
+        // --- Améliore la visibilité pour les événements TTS
         if (ev.type === 'tts') {
-            chart.chart.ctx.arc(x, chart.chartHeight - 18, 7, 0, 2 * Math.PI);
+            // Large halo fluo
+            chart.chart.ctx.save();
+            chart.chart.ctx.globalAlpha = 0.45;
+            chart.chart.ctx.beginPath();
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 23, 0, 2 * Math.PI);
+            chart.chart.ctx.fillStyle = "#ffe970";
+            chart.chart.ctx.shadowBlur = 22;
+            chart.chart.ctx.shadowColor = "#ffe970";
+            chart.chart.ctx.fill();
+            chart.chart.ctx.restore();
+
+            // Rond jaune épais
+            chart.chart.ctx.save();
+            chart.chart.ctx.strokeStyle = "#c9b801";
+            chart.chart.ctx.lineWidth = 6;
+            chart.chart.ctx.beginPath();
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 13, 0, 2 * Math.PI);
+            chart.chart.ctx.stroke();
+            chart.chart.ctx.restore();
+
+            // Rond jaune plein
+            chart.chart.ctx.save();
+            chart.chart.ctx.beginPath();
+            chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
+            chart.chart.ctx.fillStyle = "#ffe970";
+            chart.chart.ctx.fill();
+            chart.chart.ctx.restore();
+
+            // Texte [TTS] ou le pseudo
+            chart.chart.ctx.save();
+            chart.chart.ctx.font = "bold 14px Fira Mono, Consolas, Menlo, Monaco, monospace";
+            chart.chart.ctx.fillStyle = "#ffe970";
+            chart.chart.ctx.strokeStyle = "#23262b";
+            chart.chart.ctx.lineWidth = 3;
+            chart.chart.ctx.textAlign = "center";
+            chart.chart.ctx.textBaseline = "bottom";
+            let label = "[TTS]";
+            if (ev.user) label += " " + ev.user;
+            // contour pour lisibilité
+            chart.chart.ctx.strokeText(label, x, chart.chartHeight - 32);
+            chart.chart.ctx.fillText(label, x, chart.chartHeight - 32);
+            chart.chart.ctx.restore();
+
         } else {
+            // Tick = petit carré bleu
+            chart.chart.ctx.save();
+            chart.chart.ctx.strokeStyle = '#5daaff';
+            chart.chart.ctx.lineWidth = 3;
+            chart.chart.ctx.beginPath();
+            chart.chart.ctx.moveTo(x, 5);
+            chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
+            chart.chart.ctx.stroke();
+            chart.chart.ctx.beginPath();
             chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 12, 12);
+            chart.chart.ctx.fillStyle = '#5daaff';
+            chart.chart.ctx.fill();
+            chart.chart.ctx.restore();
         }
-        chart.chart.ctx.fillStyle = color;
-        chart.chart.ctx.fill();
-        chart.chart.ctx.restore();
     });
 };
+
 
 function updateOscLabels(msg, usr) {
     document.querySelector('.osc-msg').textContent = msg;
