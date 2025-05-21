@@ -43,15 +43,20 @@ body {
     letter-spacing: 1px;
     white-space: nowrap;
 }
+
 #status-dot {
-    width: 14px; height: 14px;
-    border-radius: 50%; background: #eb4444;
-    display: inline-block; vertical-align: middle;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #eb4444;
+    display: inline-block;
+    vertical-align: middle;
     box-shadow: 0 0 4px #c40;
     margin: 0 4px;
     transition: background 0.2s;
 }
 #status-dot.online { background: #41ff79; }
+#status-dot.offline { background: #eb4444; }
 #viewer-count {
     font-size: 1.13rem;
     color: #7dffb0;
