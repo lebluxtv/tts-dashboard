@@ -6,9 +6,6 @@
   --event-tts: #ffef61;
   --text: #ececec;
   --user: #85cdfd;
-  --user-alt: #fff1a9;
-  --event1: #64ffb6;
-  --event2: #ff9090;
   --shadow: 0 2px 12px #000a;
 }
 
@@ -59,10 +56,62 @@ header h1 {
 .dot.online { background: #38ff68; box-shadow: 0 0 10px #38ff6866; }
 .dot.offline { background: #ff3e3e; box-shadow: 0 0 10px #ff3e3e66; }
 
+.session-controls {
+    display: flex; gap: 16px; align-items: center;
+    padding: 12px 32px 0 32px;
+}
+.session-controls button,
+.session-controls .file-btn {
+    background: #21262c;
+    color: #ececec;
+    border: 1px solid #32363d;
+    border-radius: 8px;
+    padding: 5px 16px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.15s, border 0.15s;
+    font-family: inherit;
+    margin-right: 8px;
+}
+.session-controls button:hover,
+.session-controls .file-btn:hover {
+    background: var(--accent);
+    color: #21262c;
+    border: 1px solid var(--accent);
+}
+.session-controls input[type="file"] {
+    display: none;
+}
+
 .timeline-section {
   padding: 20px 30px 8px 30px;
   position: relative;
 }
+
+.timeline-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  margin-left: 6px;
+}
+
+.timeline-controls button {
+  background: #21262c;
+  color: #ececec;
+  border: 1px solid #32363d;
+  border-radius: 8px;
+  padding: 5px 15px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.15s, border 0.15s;
+}
+.timeline-controls button:hover,
+.timeline-controls button.active {
+  background: var(--accent);
+  color: #21262c;
+  border: 1px solid var(--accent);
+}
+
 #oscilloscope {
     background: #1e232b;
     border-radius: 12px;
