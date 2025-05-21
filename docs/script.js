@@ -12,7 +12,7 @@ const client = new StreamerbotClient({
         try {
             const resp = await client.getActiveViewers();
             if (resp && resp.viewers) {
-                viewerCountSpan.textContent = "● " + resp.viewers.length;
+                viewerCountSpan.textContent = "👀 " + resp.viewers.length;
                 viewerCountSpan.title = resp.viewers.map(v => v.display).join(', ');
             } else {
                 viewerCountSpan.textContent = "";
