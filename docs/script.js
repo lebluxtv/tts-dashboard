@@ -21,7 +21,7 @@ const timelineBtns = document.querySelectorAll('.timeline-controls button');
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
 const smoothie = new SmoothieChart({
-    millisPerPixel: 60,    // 1min par 1000px par défaut (modifiable)
+    millisPerPixel: 60,
     grid: { strokeStyle: '#233', fillStyle: '#16181c', lineWidth: 1, millisPerLine: 1000, verticalSections: 6 },
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
@@ -33,7 +33,6 @@ smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lin
 smoothie.addTimeSeries(usersLine, { strokeStyle: 'rgba(93,170,255,0.9)', lineWidth: 2, lineDash: [6,4] });
 smoothie.streamTo(oscillo, 0);
 
-// --- Marqueurs events sur la timeline (Ticks/TTS) ---
 smoothie.options.onDraw = function (chart) {
     let now = Date.now();
     let millisPerPixel = chart.options.millisPerPixel || 60;
@@ -65,13 +64,11 @@ smoothie.options.onDraw = function (chart) {
     });
 };
 
-// Affiche la valeur en live
 function updateOscLabels(msg, usr) {
     document.querySelector('.osc-msg').textContent = msg;
     document.querySelector('.osc-users').textContent = usr;
 }
 
-// --- Alimentation de l'oscilloscope en direct ---
 setInterval(() => {
     let now = Date.now();
     let messagesLastSec = chatBuffer.filter(m =>
@@ -84,7 +81,6 @@ setInterval(() => {
     updateOscLabels(messagesLastSec.length, uniqueUsers);
 }, 400);
 
-// --- Affichage chat “dernier en haut” + auto-scroll top ---
 function renderChat() {
     const isAtTop = chatDiv.scrollTop < 20;
     chatDiv.innerHTML = chatBuffer.slice(-100).reverse().map(msg => {
@@ -100,7 +96,6 @@ function renderChat() {
     if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
 
-// --- Contrôle timeline (zoom, adaptatif) ---
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
     timelineBtns.forEach(btn => btn.classList.remove('active'));
@@ -113,7 +108,7 @@ function setTimelineWindow(mode, seconds = 60) {
     } else if (mode === "adapt") {
         let btn = Array.from(timelineBtns).find(b => b.dataset.scale === "adapt");
         if (btn) btn.classList.add('active');
-        adaptTimeline(); // lance une 1ère adaptation immédiate
+        adaptTimeline();
     }
 }
 timelineBtns.forEach(btn => {
@@ -132,11 +127,10 @@ function adaptTimeline() {
     let maxTime = Date.now();
     let duration = maxTime - minTime;
     let px = oscillo.width;
-    smoothie.options.millisPerPixel = Math.max(duration / px, 10); // minimum 10 ms/px
+    smoothie.options.millisPerPixel = Math.max(duration / px, 10);
 }
 setInterval(adaptTimeline, 1500);
 
-// --- SESSION LOGGING/LOADING ---
 function saveSession() {
     const data = {
         generatedAt: new Date().toISOString(),
@@ -179,13 +173,11 @@ document.getElementById('load-session').addEventListener('change', function (e) 
     reader.readAsText(file);
 });
 
-// --- Websocket Events ---
 client.on('connected', () => {
     statusDot.classList.remove('offline');
     statusDot.classList.add('online');
 });
 client.on('disconnected', () => {
-    statusDot.classList.remove('online');
     statusDot.classList.remove('online');
     statusDot.classList.add('offline');
 });
@@ -219,5 +211,4 @@ client.on('General.Custom', ({ event, data }) => {
     }
 });
 
-// --- Init par défaut sur 1min ---
 setTimelineWindow("scale", 60);
