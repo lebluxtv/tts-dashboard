@@ -92,8 +92,19 @@ body {
     align-items: stretch;
     min-height: 52px;
     box-sizing: border-box;
+    border: 2px solid #262b2f; /* Bordure neutre par défaut */
+    transition: box-shadow 0.2s, border-color 0.2s, opacity 0.25s;
 }
-
+#tts-panel.twitch-tts-glow {
+    border: 2px solid #ffee90;
+    box-shadow: 0 0 0 4px #ffef61cc;
+    opacity: 1;
+    transition: box-shadow 0.2s, border-color 0.2s, opacity 3s linear;
+}
+#tts-panel.twitch-tts-glow.fade {
+    opacity: 0;
+    transition: opacity 3s linear;
+}
 #tts-header {
     background: #232b2e;
     color: #ffef61;
