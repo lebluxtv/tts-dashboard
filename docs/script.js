@@ -21,7 +21,8 @@ const timelineBtns = document.querySelectorAll('.timeline-controls button');
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
 oscillo.width = oscillo.parentElement.offsetWidth; // Auto-adapte largeur
-oscillo.height = 200; // Fixe la hauteur
+oscillo.height = oscillo.parentElement.offsetHeight;
+
 
 const smoothie = new SmoothieChart({
     millisPerPixel: 60,
