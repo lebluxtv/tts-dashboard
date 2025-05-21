@@ -5,9 +5,9 @@
     <title>TTS Auto Message Reader - Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
-    <!-- Smoothie Charts (timeline oscilloscope) -->
+    <!-- Smoothie Charts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.36.0/smoothie.min.js"></script>
-    <!-- Client Streamer.bot -->
+    <!-- Streamer.bot Client -->
     <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
 </head>
 <body>
@@ -15,7 +15,20 @@
         <header>
             <h1>TTS Auto Message Reader <span id="status-dot" class="dot offline"></span></h1>
         </header>
+        <div class="session-controls">
+            <button id="save-session">💾 Sauver la session</button>
+            <label class="file-btn">
+                📂 Charger un log
+                <input type="file" id="load-session" accept=".json" style="display:none;">
+            </label>
+        </div>
         <section class="timeline-section">
+            <div class="timeline-controls">
+                <button data-scale="60">1 min</button>
+                <button data-scale="300">5 min</button>
+                <button data-scale="600">10 min</button>
+                <button data-scale="adapt">Tout</button>
+            </div>
             <div class="oscillo-labels">
                 <span><span class="osc-msg"></span> msgs/s</span>
                 <span><span class="osc-users"></span> users/s</span>
