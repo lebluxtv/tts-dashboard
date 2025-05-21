@@ -107,18 +107,19 @@ smoothie.options.onDraw = function (chart) {
         chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
         chart.chart.ctx.stroke();
 
-        // Dessin icône
-        chart.chart.ctx.beginPath();
-        if (iconType === "tts") {
-            chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
-        } else if (iconType === "Follow") {
-            chart.chart.ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
-        } else {
-            chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
-        }
-        chart.chart.ctx.fillStyle = color;
-        chart.chart.ctx.fill();
-        chart.chart.ctx.restore();
+        /// Dessin icône
+chart.chart.ctx.beginPath();
+if (iconType === "tts") {
+    console.log("ON DRAW: repère TTS à x=", x, "color=", color, "time=", ev.time, "now=", now, "millisPerPixel=", millisPerPixel, "chartWidth=", chart.chartWidth);
+    chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
+} else if (iconType === "Follow") {
+    chart.chart.ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
+} else {
+    chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+}
+chart.chart.ctx.fillStyle = color;
+chart.chart.ctx.fill();
+chart.chart.ctx.restore();
     });
 };
 
