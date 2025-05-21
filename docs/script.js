@@ -312,6 +312,7 @@ client.on('General.Custom', ({ event, data }) => {
         });
         if (chatBuffer.length > maxChat) chatBuffer.shift();
         renderChat();
+ console.log("TTS event ajouté au graph", data.time, data.selectedUser);
         eventsBuffer.push({ type: 'tts', time: data.time, user: data.selectedUser, message: data.message });
         if (eventsBuffer.length > 1000) eventsBuffer.shift();
     }
