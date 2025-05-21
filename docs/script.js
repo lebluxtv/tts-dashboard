@@ -274,6 +274,7 @@ document.getElementById('load-session').addEventListener('change', function (e) 
 
 // -- MAIN CUSTOM EVENTS: CHAT, TTS, ETC --
 client.on('General.Custom', ({ event, data }) => {
+console.log("RECU:", data);
     if (data?.widget === "tts-catcher") {
         chatBuffer.push({
             time: data.time,
