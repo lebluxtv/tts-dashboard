@@ -20,11 +20,9 @@ const timelineBtns = document.querySelectorAll('.timeline-controls button');
 
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
-
-// Fonction pour ajuster le canvas à la taille de son parent
 function resizeOscillo() {
     oscillo.width = oscillo.parentElement.offsetWidth;
-    oscillo.height = oscillo.parentElement.offsetHeight;
+    oscillo.height = 260;
 }
 window.addEventListener('resize', resizeOscillo);
 resizeOscillo();
@@ -38,83 +36,52 @@ const smoothie = new SmoothieChart({
 const messagesLine = new TimeSeries();
 const usersLine = new TimeSeries();
 
-smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: 3 });
+let currentLineWidth = 3; // Line width for messagesLine
+
+function updateLineWidth(scale) {
+    // Adapt width: thin lines for longer periods, thick for short
+    if (scale <= 60) currentLineWidth = 3;
+    else if (scale <= 300) currentLineWidth = 2;
+    else if (scale <= 600) currentLineWidth = 1.3;
+    else currentLineWidth = 1;
+    smoothie.removeTimeSeries(messagesLine);
+    smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: currentLineWidth });
+    // usersLine stays constant, for clarity
+}
+smoothie.addTimeSeries(messagesLine, { strokeStyle: 'rgba(69,255,229,0.95)', lineWidth: currentLineWidth });
 smoothie.addTimeSeries(usersLine, { strokeStyle: 'rgba(93,170,255,0.9)', lineWidth: 2, lineDash: [6,4] });
 smoothie.streamTo(oscillo, 0);
 
 smoothie.options.onDraw = function (chart) {
     let now = Date.now();
     let millisPerPixel = chart.options.millisPerPixel || 60;
-    let windowMillis = chart.options.duration || (chart.chartWidth * millisPerPixel);
 
     eventsBuffer.forEach(ev => {
         let t = new Date(ev.time).getTime();
         let x = chart.chartWidth - ((now - t) / millisPerPixel);
         if (x < 0 || x > chart.chartWidth) return;
-
-        // --- Améliore la visibilité pour les événements TTS
+        let color = ev.type === 'tts' ? '#ffef61' : '#5daaff';
+        chart.chart.ctx.save();
+        chart.chart.ctx.globalAlpha = 0.75;
+        chart.chart.ctx.strokeStyle = color;
+        chart.chart.ctx.lineWidth = 3;
+        // Ligne verticale
+        chart.chart.ctx.beginPath();
+        chart.chart.ctx.moveTo(x, 5);
+        chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
+        chart.chart.ctx.stroke();
+        // Icône
+        chart.chart.ctx.beginPath();
         if (ev.type === 'tts') {
-            // Large halo fluo
-            chart.chart.ctx.save();
-            chart.chart.ctx.globalAlpha = 0.45;
-            chart.chart.ctx.beginPath();
-            chart.chart.ctx.arc(x, chart.chartHeight - 18, 23, 0, 2 * Math.PI);
-            chart.chart.ctx.fillStyle = "#ffe970";
-            chart.chart.ctx.shadowBlur = 22;
-            chart.chart.ctx.shadowColor = "#ffe970";
-            chart.chart.ctx.fill();
-            chart.chart.ctx.restore();
-
-            // Rond jaune épais
-            chart.chart.ctx.save();
-            chart.chart.ctx.strokeStyle = "#c9b801";
-            chart.chart.ctx.lineWidth = 6;
-            chart.chart.ctx.beginPath();
-            chart.chart.ctx.arc(x, chart.chartHeight - 18, 13, 0, 2 * Math.PI);
-            chart.chart.ctx.stroke();
-            chart.chart.ctx.restore();
-
-            // Rond jaune plein
-            chart.chart.ctx.save();
-            chart.chart.ctx.beginPath();
             chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
-            chart.chart.ctx.fillStyle = "#ffe970";
-            chart.chart.ctx.fill();
-            chart.chart.ctx.restore();
-
-            // Texte [TTS] ou le pseudo
-            chart.chart.ctx.save();
-            chart.chart.ctx.font = "bold 14px Fira Mono, Consolas, Menlo, Monaco, monospace";
-            chart.chart.ctx.fillStyle = "#ffe970";
-            chart.chart.ctx.strokeStyle = "#23262b";
-            chart.chart.ctx.lineWidth = 3;
-            chart.chart.ctx.textAlign = "center";
-            chart.chart.ctx.textBaseline = "bottom";
-            let label = "[TTS]";
-            if (ev.user) label += " " + ev.user;
-            // contour pour lisibilité
-            chart.chart.ctx.strokeText(label, x, chart.chartHeight - 32);
-            chart.chart.ctx.fillText(label, x, chart.chartHeight - 32);
-            chart.chart.ctx.restore();
-
         } else {
-            // Tick = petit carré bleu
-            chart.chart.ctx.save();
-            chart.chart.ctx.strokeStyle = '#5daaff';
-            chart.chart.ctx.lineWidth = 3;
-            chart.chart.ctx.beginPath();
-            chart.chart.ctx.moveTo(x, 5);
-            chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
-            chart.chart.ctx.stroke();
-            chart.chart.ctx.beginPath();
             chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 12, 12);
-            chart.chart.ctx.fillStyle = '#5daaff';
-            chart.chart.ctx.fill();
-            chart.chart.ctx.restore();
         }
+        chart.chart.ctx.fillStyle = color;
+        chart.chart.ctx.fill();
+        chart.chart.ctx.restore();
     });
 };
-
 
 function updateOscLabels(msg, usr) {
     document.querySelector('.osc-msg').textContent = msg;
@@ -152,6 +119,11 @@ function renderChat() {
     if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
 
+// Redimensionne le canvas au resize (optionnel, adaptatif)
+window.addEventListener('resize', () => {
+    resizeOscillo();
+});
+
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
     timelineBtns.forEach(btn => btn.classList.remove('active'));
@@ -161,10 +133,12 @@ function setTimelineWindow(mode, seconds = 60) {
         lastScaleSeconds = seconds;
         let px = oscillo.width;
         smoothie.options.millisPerPixel = (seconds * 1000) / px;
+        updateLineWidth(seconds);
     } else if (mode === "adapt") {
         let btn = Array.from(timelineBtns).find(b => b.dataset.scale === "adapt");
         if (btn) btn.classList.add('active');
         adaptTimeline();
+        updateLineWidth(600); // adaptif: fine
     }
 }
 timelineBtns.forEach(btn => {
@@ -184,6 +158,7 @@ function adaptTimeline() {
     let duration = maxTime - minTime;
     let px = oscillo.width;
     smoothie.options.millisPerPixel = Math.max(duration / px, 10);
+    updateLineWidth(duration/1000);
 }
 setInterval(adaptTimeline, 1500);
 
@@ -238,31 +213,33 @@ client.on('disconnected', () => {
     statusDot.classList.add('offline');
 });
 
-// --- TTS HEADER LOGIC ---
-let lastTtsTimestamp = null;
-let ttsDuration = 3 * 60 * 1000; // 3 minutes
-function setTtsHeader(user, msg, time = null) {
-    document.getElementById('tts-user').textContent = user ? `[${user}]` : "";
-    document.getElementById('tts-msg').textContent = msg || "";
-    lastTtsTimestamp = time ? new Date(time).getTime() : Date.now();
-    updateTtsTimer();
+// --- TTS HEADER + BAR LOGIC ---
+let ttsTimeout = null;
+let ttsLastTime = 0;
+function setTtsHeader(user, msg, time) {
+    ttsLastTime = time ? new Date(time).getTime() : Date.now();
+    document.getElementById("tts-user").textContent = user || 'TTS';
+    document.getElementById("tts-message").textContent = msg || '';
+    document.getElementById("tts-header").classList.add("active");
+    fillTtsBar();
 }
-function updateTtsTimer() {
-    if (!lastTtsTimestamp) {
-        document.getElementById('tts-timerbar').style.width = "0%";
-        document.getElementById('tts-timerbar-label').textContent = "";
-        return;
+function fillTtsBar() {
+    if (ttsTimeout) clearInterval(ttsTimeout);
+    let bar = document.getElementById("tts-timer-fill");
+    bar.style.width = "100%";
+    let total = 180; // 3 min max
+    function updateBar() {
+        let elapsed = (Date.now() - ttsLastTime) / 1000;
+        let left = Math.max(0, total - elapsed);
+        bar.style.width = `${Math.max(0, (left / total) * 100)}%`;
+        if (left <= 0) {
+            bar.style.width = "0%";
+            clearInterval(ttsTimeout);
+        }
     }
-    let elapsed = Date.now() - lastTtsTimestamp;
-    let pct = Math.max(0, 100 - (elapsed / ttsDuration) * 100);
-    document.getElementById('tts-timerbar').style.width = pct + "%";
-    let remaining = Math.max(0, ttsDuration - elapsed);
-    let mins = Math.floor(remaining / 60000);
-    let secs = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('tts-timerbar-label').textContent = `⏳ ${mins}:${secs.toString().padStart(2, "0")} avant prochain TTS`;
+    ttsTimeout = setInterval(updateBar, 450);
 }
-setInterval(updateTtsTimer, 200);
-
+setTtsHeader("Aucun TTS", "", 0);
 
 client.on('General.Custom', ({ event, data }) => {
     if (data?.widget === "tts-catcher") {
@@ -276,8 +253,7 @@ client.on('General.Custom', ({ event, data }) => {
         renderChat();
     }
     else if (data?.widget === "tts-reader-selection") {
-         console.log("[TTS Selection]", data.selectedUser, data.message);
-setTtsHeader(data.selectedUser, data.message, data.time);
+        setTtsHeader(data.selectedUser, data.message, data.time);
         chatBuffer.push({
             time: data.time,
             user: data.selectedUser,
