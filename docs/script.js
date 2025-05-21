@@ -20,6 +20,9 @@ const timelineBtns = document.querySelectorAll('.timeline-controls button');
 
 // --- OSCILLOSCOPE (Smoothie Charts) ---
 const oscillo = document.getElementById('oscilloscope');
+oscillo.width = oscillo.parentElement.offsetWidth; // Auto-adapte largeur
+oscillo.height = 200; // Fixe la hauteur
+
 const smoothie = new SmoothieChart({
     millisPerPixel: 60,
     grid: { strokeStyle: '#233', fillStyle: '#16181c', lineWidth: 1, millisPerLine: 1000, verticalSections: 6 },
@@ -83,6 +86,10 @@ setInterval(() => {
 
 function renderChat() {
     const isAtTop = chatDiv.scrollTop < 20;
+    if (chatBuffer.length === 0) {
+        chatDiv.innerHTML = `<div style="opacity:.5;text-align:center;">Aucun message reçu</div>`;
+        return;
+    }
     chatDiv.innerHTML = chatBuffer.slice(-100).reverse().map(msg => {
         if (msg.isTTS) {
             return `<div class="chat-msg chat-tts">[TTS] <span class="chat-usr">${msg.user}</span> : ${msg.message}</div>`;
@@ -95,6 +102,11 @@ function renderChat() {
     if (isAtTop) chatDiv.scrollTop = 0;
     if (chatDiv.scrollTop !== 0 && chatDiv.scrollHeight > chatDiv.clientHeight) chatDiv.scrollTop = 0;
 }
+
+// Redimensionne le canvas au resize (optionnel, adaptatif)
+window.addEventListener('resize', () => {
+    oscillo.width = oscillo.parentElement.offsetWidth;
+});
 
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
