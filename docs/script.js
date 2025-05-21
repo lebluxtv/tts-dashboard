@@ -84,44 +84,48 @@ smoothie.options.onDraw = function (chart) {
 
     // Events (ex: TTS, Twitch events)
     eventsBuffer.forEach(ev => {
-        let t = new Date(ev.time).getTime();
-        let x = chart.chartWidth - ((now - t) / millisPerPixel);
-        if (x < 0 || x > chart.chartWidth) return;
-        let color = "#ffef61";
-        let iconType = ev.type;
-        switch (iconType) {
-            case "tts":      color = "#ffef61"; break;
-            case "Sub":      color = "#42b0ff"; break;
-            case "ReSub":    color = "#28e7d7"; break;
-            case "GiftSub":  color = "#ff41b0"; break;
-            case "GiftBomb": color = "#ff41b0"; break;
-            case "Follow":   color = "#a7ff8e"; break;
-            case "Cheer":    color = "#ffd256"; break;
-            default:         color = "#5daaff";
-        }
-        chart.chart.ctx.save();
-        chart.chart.ctx.strokeStyle = color;
-        chart.chart.ctx.lineWidth = 3;
-        chart.chart.ctx.beginPath();
-        chart.chart.ctx.moveTo(x, 5);
-        chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
-        chart.chart.ctx.stroke();
+    let t = new Date(ev.time).getTime();
+    let x = chart.chartWidth - ((now - t) / millisPerPixel);
+    if (x < 0 || x > chart.chartWidth) return;
 
-        /// Dessin icône
-chart.chart.ctx.beginPath();
-if (iconType === "tts") {
-    console.log("ON DRAW: repère TTS à x=", x, "color=", color, "time=", ev.time, "now=", now, "millisPerPixel=", millisPerPixel, "chartWidth=", chart.chartWidth);
-    chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
-} else if (iconType === "Follow") {
-    chart.chart.ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
-} else {
-    chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
-}
-chart.chart.ctx.fillStyle = color;
-chart.chart.ctx.fill();
-chart.chart.ctx.restore();
-    });
-};
+    let color;
+    let iconType = ev.type;
+    switch (iconType) {
+        case "tts":      color = "#ffef61"; break;       // Jaune pour TTS
+        case "chat":     color = "#39c3ff"; break;       // BLEU VIF pour chat
+        case "Sub":      color = "#42b0ff"; break;
+        case "ReSub":    color = "#28e7d7"; break;
+        case "GiftSub":  color = "#ff41b0"; break;
+        case "GiftBomb": color = "#ff41b0"; break;
+        case "Follow":   color = "#a7ff8e"; break;
+        case "Cheer":    color = "#ffd256"; break;
+        default:         color = "#5daaff";
+    }
+
+    chart.chart.ctx.save();
+    chart.chart.ctx.strokeStyle = color;
+    chart.chart.ctx.lineWidth = (iconType === "chat") ? 2 : 3;
+    chart.chart.ctx.beginPath();
+    chart.chart.ctx.moveTo(x, 5);
+    chart.chart.ctx.lineTo(x, chart.chartHeight - 5);
+    chart.chart.ctx.stroke();
+
+    // Dessin icône/marqueur
+    chart.chart.ctx.beginPath();
+    if (iconType === "tts") {
+        chart.chart.ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
+    } else if (iconType === "chat") {
+        chart.chart.ctx.arc(x, chart.chartHeight - 12, 4, 0, 2 * Math.PI); // petit point bleu
+    } else if (iconType === "Follow") {
+        chart.chart.ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
+    } else {
+        chart.chart.ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+    }
+    chart.chart.ctx.fillStyle = color;
+    chart.chart.ctx.fill();
+    chart.chart.ctx.restore();
+});
+
 
 function updateOscLabels(msg, usr) {
     document.querySelector('.osc-msg').textContent = msg;
