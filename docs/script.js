@@ -341,3 +341,4 @@ async function refreshViewers() {
     }
 }
 setInterval(refreshViewers, 10000);
+}
