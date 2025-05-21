@@ -5,8 +5,8 @@
     <title>TTS Auto Message Reader - Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
-    <!-- Chart.js pour la timeline -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Smoothie Charts (timeline oscilloscope) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.36.0/smoothie.min.js"></script>
     <!-- Client Streamer.bot -->
     <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
 </head>
@@ -14,17 +14,13 @@
     <div class="dashboard-container">
         <header>
             <h1>TTS Auto Message Reader <span id="status-dot" class="dot offline"></span></h1>
-            <div class="range-controls">
-                <button data-range="1m">1 min</button>
-                <button data-range="5m">5 min</button>
-                <button data-range="10m" class="active">10 min</button>
-                <button data-range="30m">30 min</button>
-                <button data-range="1h">1h</button>
-                <button data-range="max">Max</button>
-            </div>
         </header>
         <section class="timeline-section">
-            <canvas id="timelineChart"></canvas>
+            <div class="oscillo-labels">
+                <span><span class="osc-msg"></span> msgs/s</span>
+                <span><span class="osc-users"></span> users/s</span>
+            </div>
+            <canvas id="oscilloscope" width="1000" height="140"></canvas>
         </section>
         <section class="chat-section">
             <div id="chat-log"></div>
