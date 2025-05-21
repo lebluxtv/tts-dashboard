@@ -3,7 +3,7 @@ const client = new StreamerbotClient({
     host: '127.0.0.1',
     port: 8080,
     endpoint: '/',
-    password: '',
+    password: 'streamer.bot',
     onConnect: async (data) => {
         console.log("WebSocket connecté !", data);
         statusDot.classList.remove('offline');
