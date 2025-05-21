@@ -205,6 +205,7 @@ client.on('General.Custom', ({ event, data }) => {
         renderChat();
     }
     else if (data?.widget === "tts-reader-selection") {
+console.log("[TTS Selection]", data.selectedUser, data.message);
         chatBuffer.push({
             time: data.time,
             user: data.selectedUser,
