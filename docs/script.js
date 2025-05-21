@@ -293,9 +293,15 @@ client.on('General.Custom', ({ event, data }) => {
             message: data.message,
             eligible: data.isEligible
         });
-
-        eventsBuffer.push({ type: 'chat', time: data.time, user: data.user });
         if (chatBuffer.length > maxChat) chatBuffer.shift();
+        // -------- AJOUT DU PLOT SUR LE GRAPH -----------
+        eventsBuffer.push({
+            type: 'chat',
+            time: data.time,
+            user: data.user,
+            message: data.message
+        });
+        if (eventsBuffer.length > 1000) eventsBuffer.shift();
         renderChat();
     }
     else if (data?.widget === "tts-reader-selection") {
