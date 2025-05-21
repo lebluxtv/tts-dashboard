@@ -5,13 +5,20 @@ const client = new StreamerbotClient({
     endpoint: '/',
     password: 'streamer.bot',
     onConnect: async (data) => {
-        console.log("WebSocket connecté !", data);
- // 🔥 Force la souscription aux événements custom
-    client.subscribe('General.Custom');
-   // client.subscribe('Broadcast.Custom');
+        console.log("✅ WebSocket connecté !", data);
         statusDot.classList.remove('offline');
         statusDot.classList.add('online');
-        // Active viewers
+
+        try {
+            // 💬 Test d’abonnement manuel (fallback de sécurité)
+            await client.subscribe('General.Custom');
+            await client.subscribe('Broadcast.Custom');
+            console.log("📡 Subscriptions General.Custom et Broadcast.Custom envoyées.");
+        } catch (err) {
+            console.warn("⚠️ Échec de l’abonnement explicite (peut être normal si `.on()` le gère déjà) :", err.message);
+        }
+
+        // 🎯 Récupération des viewers
         try {
             const resp = await client.getActiveViewers();
             if (resp && resp.viewers) {
@@ -25,12 +32,81 @@ const client = new StreamerbotClient({
         }
     },
     onDisconnect: () => {
-        console.log("WebSocket déconnecté !");
+        console.log("🔌 WebSocket déconnecté !");
         statusDot.classList.remove('online');
         statusDot.classList.add('offline');
         viewerCountSpan.textContent = "";
     }
 });
+
+// --- Logs étendus + fallback Broadcast ---
+client.on('General.Custom', ({ event, data }) => {
+    console.log("📨 [General.Custom] RECU :", data);
+    handleCustomEvent(data);
+});
+client.on('Broadcast.Custom', ({ event, data }) => {
+    console.log("📨 [Broadcast.Custom] RECU :", data);
+    handleCustomEvent(data);
+});
+
+// Fonction unique de traitement
+function handleCustomEvent(data) {
+    if (!data?.widget) return;
+
+    if (data.widget === "tts-catcher") {
+        chatBuffer.push({
+            time: data.time,
+            user: data.user,
+            message: data.message,
+            eligible: data.isEligible
+        });
+        if (chatBuffer.length > maxChat) chatBuffer.shift();
+        eventsBuffer.push({
+            type: 'chat',
+            time: data.time,
+            user: data.user,
+            message: data.message
+        });
+        if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        renderChat();
+    }
+
+    else if (data.widget === "tts-reader-selection") {
+        setTtsHeader(data.selectedUser, data.message, data.time);
+        ttsPanel.classList.remove('twitch-tts-glow', 'fade');
+        void ttsPanel.offsetWidth;
+        ttsPanel.classList.add('twitch-tts-glow');
+        setTimeout(() => ttsPanel.classList.add('fade'), 10);
+        setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow', 'fade'), 3010);
+
+        chatBuffer.push({
+            time: data.time,
+            user: data.selectedUser,
+            message: data.message,
+            eligible: true,
+            isTTS: true
+        });
+        if (chatBuffer.length > maxChat) chatBuffer.shift();
+        renderChat();
+
+        eventsBuffer.push({
+            type: 'tts',
+            time: data.time,
+            user: data.selectedUser,
+            message: data.message
+        });
+        if (eventsBuffer.length > 1000) eventsBuffer.shift();
+
+        console.log("🔊 TTS ajouté au graph :", data.selectedUser, data.message);
+    }
+
+    else if (data.widget === "tts-reader-tick") {
+        eventsBuffer.push({ type: 'tick', time: data.time });
+        if (eventsBuffer.length > 1000) eventsBuffer.shift();
+        console.log("⏱ Tick reçu pour le graph :", data.time);
+    }
+}
+
 
 
 // --- Data buffers ---
