@@ -27,14 +27,28 @@ body {
 }
 
 #tts-panel {
-    width: 100vw;
-    max-width: 1550px;
-    margin: 16px auto 0 auto;
+    width: 100%;
+    margin: 0 0 12px 0;
+    padding: 18px 26px 14px 26px;
+    background: var(--panel);
+    border-radius: 16px;
+    box-shadow: 0 2px 24px #0003;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+    min-height: 52px;
+}
+.timeline-topbar {
+    background: var(--panel);
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 2px 24px #0007;
+    margin-bottom: 2px;
+    padding: 6px 20px 2px 20px;
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
-    z-index: 10;
-    position: relative;
+    min-height: 44px;
+    width: 100%;
 }
 
 #tts-header {
@@ -158,7 +172,7 @@ body {
 
 .timeline-controls {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     justify-content: flex-end;
     margin-bottom: 4px;
     margin-top: 0;
