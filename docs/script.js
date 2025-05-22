@@ -147,45 +147,46 @@ document.addEventListener('DOMContentLoaded', () => {
   smoothie.addTimeSeries(dummy, { strokeStyle: 'rgba(0,0,0,0)', lineWidth: 0 });
   setInterval(() => dummy.append(Date.now(), 0), 1000);
 
-  // === 6) onDraw hook: draw bars, icons & labels ===
-  smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
-    const now   = Date.now();
-    const mpp   = options.millisPerPixel;
-    const ctx   = chart.canvas.getContext('2d');
-    const tolPx = 5;
-    const overlaps = {};
+// === 6) onDraw hook: draw bars, icons & labels ===
+smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
+  const now   = Date.now();
+  const mpp   = options.millisPerPixel;
+  const ctx   = chart.canvas.getContext('2d');
+  const tolPx = 5;
+  const overlaps = {};
 
-    eventsBuffer.forEach(ev => {
-      const rawX = W - (now - ev.time) / mpp;
-      if (rawX < 0 || rawX > W) return;
-      const bucketX = Math.round(rawX / tolPx) * tolPx;
-      const idx     = overlaps[bucketX] || 0;
-      overlaps[bucketX] = idx + 1;
+  eventsBuffer.forEach(ev => {
+    const rawX = W - (now - ev.time) / mpp;
+    if (rawX < 0 || rawX > W) return;
+    const bucketX = Math.round(rawX / tolPx) * tolPx;
+    const idx     = overlaps[bucketX] || 0;
+    overlaps[bucketX] = idx + 1;
 
-      // 6.1) style
-      const { color, width } = getStyleFor(ev.type);
+    const { color, width } = getStyleFor(ev.type);
 
-      // 6.2) draw vertical bar
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = width;
-      ctx.beginPath();
-      ctx.moveTo(bucketX, 5);
-      ctx.lineTo(bucketX, H - 5);
-      ctx.stroke();
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = width;
 
-      // 6.3) draw icon
-      ctx.beginPath();
-      drawIcon(ev.type, ctx, bucketX, H);
-      ctx.fillStyle = color;
-      ctx.fill();
+    // — draw vertical bar at rawX
+    ctx.beginPath();
+    ctx.moveTo(rawX, 5);
+    ctx.lineTo(rawX, H - 5);
+    ctx.stroke();
 
-      // 6.4) draw label
-      drawLabel(ev, ctx, bucketX, idx);
+    // — draw icon at rawX
+    ctx.beginPath();
+    drawIcon(ev.type, ctx, rawX, H);
+    ctx.fillStyle = color;
+    ctx.fill();
 
-      ctx.restore();
-    });
-  };
+    // — draw label at rawX, offset by idx
+    drawLabel(ev, ctx, rawX, idx);
+
+    ctx.restore();
+  });
+};
+
   smoothie.streamTo(oscillo, 0);
 
   // === 7) Timeline controls & adapt ===
