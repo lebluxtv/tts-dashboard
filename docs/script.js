@@ -317,23 +317,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === 13) Helper functions ===
-  function getStyleFor(type) {
-    let color='#888888', width=2;
-    switch(type) {
-      case 'tts':          color='#ffef61'; break;
-      case 'chat':         color='rgba(57,195,255,0.4)'; width=1; break;
-      case 'Follow':       color='#a7ff8e'; break;
-      // … other cases …
-      case 'TimedAction':  color='#95a5a6'; break;
-    }
-    return { color, width };
+function getStyleFor(type) {
+  let color = '#888888';
+  let width = 2;
+
+  switch (type) {
+    // Custom
+    case 'tts':      color = '#ffef61';      break;
+    case 'chat':      color = 'rgba(57,195,255,0.4)';      width = 1;      break;
+
+    // Twitch
+    case 'Cheer':      color = '#ffd256';      break;
+    case 'Follow':      color = '#a7ff8e';      break;
+    case 'Raid':      color = '#ffae42';      break;
+    case 'AdRun':      color = '#ffaa00';      break;
+    case 'Sub':      color = '#ff41b0';      break;
+    case 'ReSub':      color = '#28e7d7';      break;
+    case 'GiftSub':      color = '#ff71ce';      break;
+    case 'GiftBomb':      color = '#ff1f8b';      break;
+    case 'HypeTrainStart':      color = '#ff6b6b';      break;
+    case 'HypeTrainUpdate':      color = '#ff5252';      break;
+    case 'HypeTrainLevelUp':      color = '#ff3b3b';      break;
+    case 'HypeTrainEnd':      color = '#ff2424';      break;
+    case 'RewardRedemption':      color = '#8e44ad';      break;
+    case 'RewardCreated':      color = '#9b59b6';      break;
+    case 'RewardUpdated':      color = '#71368a';      break;
+    case 'RewardDeleted':      color = '#5e3370';      break;
+    case 'CommunityGoalContribution':      color = '#2ecc71';      break;
+    case 'CommunityGoalEnded':      color = '#27ae60';      break;
+    case 'PollCreated':      color = '#3498db';      break;
+    case 'PollUpdated':      color = '#2980b9';      break;
+    case 'PollEnded':      color = '#1f618d';      break;
+
+    // Misc
+    case 'TimedAction':      color = '#95a5a6';      break;
+
+    // fallback kept at defaults
   }
+
+  return { color, width };
+}
+
   function drawIcon(type, ctx, x, H) {
     if      (type==='tts')     ctx.arc(x, H-18,  8, 0, 2*Math.PI);
     else if (type==='chat')    ctx.arc(x, H-12,  4, 0, 2*Math.PI);
     else if (type==='Follow')  ctx.arc(x, H-18,  6, 0, 2*Math.PI);
     else                       ctx.rect(x-6, H-25, 13, 13);
   }
+
   function drawLabel(ev, ctx, x, idx) {
     const cfg        = labelConfig[ev.type] || labelConfig.default;
     const lineHeight = parseInt(cfg.font,10)+2;
@@ -341,15 +372,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.font      = cfg.font;
     ctx.textAlign = 'center';
     ctx.fillStyle = cfg.color;
+// TimedAction : deux lignes (type + name)
     if (ev.type==='TimedAction' && ev.name) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.name, x, baseY + lineHeight);
     }
+// Follow : deux lignes (type + displayName)
     else if (ev.type==='Follow' && ev.displayName) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.displayName, x, baseY + lineHeight);
     }
     else {
+// Default : une seule ligne (type)
       ctx.fillText(ev.type, x, baseY);
     }
   }
