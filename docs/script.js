@@ -64,7 +64,7 @@ if (event.source === 'Twitch') {
     case 'AdRun':                type = 'AdRun';   break;
 
     // — Subs
-    case 'Subscriptions':                  type = 'Sub'; break;
+    case 'Subscriptions':        type = 'Sub'; break;
     case 'Resub':                type = 'ReSub';   break;
     case 'GiftSub':              type = 'GiftSub'; break;
     case 'GiftBomb':             type = 'GiftBomb'; break;
@@ -305,11 +305,12 @@ function renderChat() {
 
 // --- handle incoming normalized events ---
 function handleCustomEvent({ type, time, user, message, isEligible }) {
+  const t = time || Date.now();
   // Chat classique
   if (type === 'chat') {
-    chatBuffer.push({ time, user, message, eligible: isEligible });
+    chatBuffer.push({ t, user, message, eligible: isEligible });
     if (chatBuffer.length > maxChat) chatBuffer.shift();
-    eventsBuffer.push({ type, time });
+    eventsBuffer.push({ type, t });
     if (eventsBuffer.length > 1000) eventsBuffer.shift();
     renderChat();
     return;
@@ -320,17 +321,17 @@ function handleCustomEvent({ type, time, user, message, isEligible }) {
     setTtsHeader(user, message);
     ttsPanel.classList.add('twitch-tts-glow');
     setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow'), 3000);
-    chatBuffer.push({ time, user, message, eligible: true, isTTS: true });
+    chatBuffer.push({ t, user, message, eligible: true, isTTS: true });
     if (chatBuffer.length > maxChat) chatBuffer.shift();
     renderChat();
-    eventsBuffer.push({ type, time });
+    eventsBuffer.push({ type, t });
     if (eventsBuffer.length > 1000) eventsBuffer.shift();
     return;
   }
 
   // Tick interne TTS (tu n’en as peut-être plus besoin si tu gères tout via '*')
   if (type === 'tick') {
-    eventsBuffer.push({ type, time });
+    eventsBuffer.push({ type, t });
     if (eventsBuffer.length > 1000) eventsBuffer.shift();
     return;
   }
@@ -338,7 +339,7 @@ function handleCustomEvent({ type, time, user, message, isEligible }) {
   // Tous les autres events trackés sur le graph
   // (Follow, Sub, GiftSub, GiftBomb, ReSub, Cheer, Raid, AdRun, etc.)
   // On n’ajoute pas de chatBuffer, mais bien un marqueur visuel
-  eventsBuffer.push({ type, time });
+  eventsBuffer.push({ type, t });
   if (eventsBuffer.length > 1000) eventsBuffer.shift();
 
   // Optionnel : si tu veux aussi afficher un message temporaire
