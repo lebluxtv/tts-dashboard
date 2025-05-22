@@ -381,45 +381,48 @@ function renderChat() {
   });
 
   // --- handle incoming normalized events ---
-  function handleCustomEvent({ type, time: eventTime, user, message, isEligible }) {
-    const time = eventTime || Date.now();
+function handleCustomEvent({ type, time: eventTime, ...payload }) {
+  const time = eventTime || Date.now();
 
-    // Chat classique
-    if (type === 'chat') {
-      chatBuffer.push({ time, user, message, eligible: isEligible });
-      if (chatBuffer.length > maxChat) chatBuffer.shift();
-      eventsBuffer.push({ type, time });
-      if (eventsBuffer.length > 1000) eventsBuffer.shift();
-      renderChat();
-      return;
-    }
+  // Chat classique
+  if (type === 'chat') {
+    chatBuffer.push({ time, user: payload.user, message: payload.message, eligible: payload.isEligible });
+    if (chatBuffer.length > maxChat) chatBuffer.shift();
 
-    // TTS
-    if (type === 'tts') {
-      setTtsHeader(user, message);
-      ttsPanel.classList.add('twitch-tts-glow');
-      setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow'), 3000);
-
-      chatBuffer.push({ time, user, message, eligible: true, isTTS: true });
-      if (chatBuffer.length > maxChat) chatBuffer.shift();
-      renderChat();
-
-      eventsBuffer.push({ type, time });
-      if (eventsBuffer.length > 1000) eventsBuffer.shift();
-      return;
-    }
-
-    // Tick interne TTS
-    if (type === 'tick') {
-      eventsBuffer.push({ type, time });
-      if (eventsBuffer.length > 1000) eventsBuffer.shift();
-      return;
-    }
-
-    // Tous les autres events graphés
-    eventsBuffer.push({ type, time });
+    eventsBuffer.push({ type, time, ...payload });
     if (eventsBuffer.length > 1000) eventsBuffer.shift();
+
+    renderChat();
+    return;
   }
+
+  // TTS
+  if (type === 'tts') {
+    setTtsHeader(payload.user, payload.message);
+    ttsPanel.classList.add('twitch-tts-glow');
+    setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow'), 3000);
+
+    chatBuffer.push({ time, user: payload.user, message: payload.message, eligible: true, isTTS: true });
+    if (chatBuffer.length > maxChat) chatBuffer.shift();
+    renderChat();
+
+    eventsBuffer.push({ type, time, ...payload });
+    if (eventsBuffer.length > 1000) eventsBuffer.shift();
+    return;
+  }
+
+  // Tick interne TTS
+  if (type === 'tick') {
+    eventsBuffer.push({ type, time, ...payload });
+    if (eventsBuffer.length > 1000) eventsBuffer.shift();
+    return;
+  }
+
+  // Tous les autres events graphés, y compris TimedAction et Follow
+  eventsBuffer.push({ type, time, ...payload });
+  if (eventsBuffer.length > 1000) eventsBuffer.shift();
+}
+
 
   // --- final init calls ---
   renderChat();
