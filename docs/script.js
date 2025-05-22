@@ -333,7 +333,7 @@ function getStyleFor(type) {
   switch (type) {
     // Custom
     case 'tts':      color = '#ffef61';      break;
-    case 'chat':      color = 'rgba(57,195,255,0.7)';      width = 1;      break;
+    case 'chat':      color = 'rgba(57,195,255,0.4)';      width = 1;      break;
 
     // Twitch
     case 'Cheer':      color = '#ffd256';      break;
