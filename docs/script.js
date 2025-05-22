@@ -77,12 +77,21 @@ document.addEventListener('DOMContentLoaded', () => {
         default: return;
       }
     }
-    else if (event.source === 'General') {
-      if      (data.widget === 'tts-catcher')          type = 'chat';
-      else if (data.widget === 'tts-reader-selection') type = 'tts';
-      else if (data.widget === 'tts-reader-tick')      type = 'tick';
-      else return;
-    }
+else if (event.source === 'General') {
+  if (data.widget === 'tts-catcher' && data.eventType === 'message') {
+    type = 'chat';
+  }
+  else if (data.widget === 'tts-reader-selection') {
+    type = 'tts';
+  }
+  else if (data.widget === 'tts-reader-tick') {
+    type = 'tick';
+  }
+  else {
+    // on ignore tout le reste venant du General
+    return;
+  }
+}
     else if (event.source === 'Misc') {
       if (event.type === 'TimedAction') type = 'TimedAction';
       else return;
