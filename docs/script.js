@@ -57,39 +57,31 @@ document.addEventListener('DOMContentLoaded', () => {
         // — Chat
         //case 'ChatMessage': type = 'chat';    break;
         case 'Whisper':     type = 'chat';    break;
-
         // — Bits / Cheers
         case 'Cheer':                type = 'Cheer';               break;
-
         // — Follows / Raids
         case 'Follow':               type = 'Follow';              break;
         case 'Raid':                 type = 'Raid';                break;
-
         // — Ads
         case 'AdRun':                type = 'AdRun';               break;
-
         // — Subs
         case 'Sub':       type = 'Sub';         break;
         case 'ReSub':     type = 'ReSub';       break;
         case 'GiftSub':   type = 'GiftSub';     break;
         case 'GiftBomb':  type = 'GiftBomb';    break;
-
         // — Hype train
         case 'HypeTrainStart':   type = 'HypeTrainStart';    break;
         case 'HypeTrainUpdate':  type = 'HypeTrainUpdate';   break;
         case 'HypeTrainLevelUp': type = 'HypeTrainLevelUp';  break;
         case 'HypeTrainEnd':     type = 'HypeTrainEnd';      break;
-
         // — Channel points
         case 'RewardRedemption': type = 'RewardRedemption';  break;
         case 'RewardCreated':    type = 'RewardCreated';     break;
         case 'RewardUpdated':    type = 'RewardUpdated';     break;
         case 'RewardDeleted':    type = 'RewardDeleted';     break;
-
         // — Community goals
         case 'CommunityGoalContribution': type = 'CommunityGoalContribution'; break;
         case 'CommunityGoalEnded':        type = 'CommunityGoalEnded';        break;
-
         // — Polls
         case 'PollCreated': type = 'PollCreated'; break;
         case 'PollUpdated': type = 'PollUpdated'; break;
@@ -154,7 +146,7 @@ const labelConfig = {
   default:                   { y: 12, font: '10px sans-serif', color: '#ffffff' }
 };
 
-  // === 4) resize canvas ===
+  // === 4) Resize canvas to fill its container ===
   function resizeOscillo() {
     const s = document.querySelector('.timeline-section');
     oscillo.width  = s.clientWidth;
@@ -163,7 +155,7 @@ const labelConfig = {
   window.addEventListener('resize', resizeOscillo);
   resizeOscillo();
 
-  // === 5) SmoothieChart + dummy series ===
+  // === 5) Init SmoothieChart and dummy series to keep it active ===
   const smoothie = new SmoothieChart({
     millisPerPixel: 60,
     grid: {
@@ -180,7 +172,7 @@ const labelConfig = {
   smoothie.addTimeSeries(dummy, { strokeStyle: 'rgba(0,0,0,0)', lineWidth: 0 });
   setInterval(() => dummy.append(Date.now(), 0), 1000);
 
-  // === 6) onDraw hook (avant streamTo) ===
+  //=== 6) onDraw hook: draw event bars, icons and labels ===
   smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
     const now = Date.now();
     const mpp = options.millisPerPixel;
@@ -191,7 +183,7 @@ const labelConfig = {
       const x = W - (now - t) / mpp;
       if (x < 0 || x > W) return;
 
-     // Valeurs par défaut
+     // default style
     let color = "#888888";
     let width = 2;
 
@@ -226,6 +218,7 @@ const labelConfig = {
         default:                          color = '#888888';
       }
 
+      // === draw vertical bar ===
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth   = width;
@@ -234,6 +227,7 @@ const labelConfig = {
       ctx.lineTo(x, H - 5);
       ctx.stroke();
 
+      // === draw event icon ===
       ctx.beginPath();
       if      (ev.type === 'tts')    ctx.arc(x, H - 18, 8, 0, 2 * Math.PI);
       else if (ev.type === 'chat')   ctx.arc(x, H - 12, 4, 0, 2 * Math.PI);
@@ -243,12 +237,30 @@ const labelConfig = {
       ctx.fill();
 
 
-    // -- ajout du label à la hauteur définie dans labelConfig --
-    const cfg = labelConfig[ev.type] || { y: 3, font: '10px sans-serif', color: '#fff' };
-    ctx.font      = cfg.font;
-    ctx.fillStyle = cfg.color;
-    ctx.textAlign = 'center';
-    ctx.fillText(ev.type, x, cfg.y);
+// -- ajout du label à la hauteur définie dans labelConfig --
+const cfg = labelConfig[ev.type] || labelConfig.default;
+ctx.font      = cfg.font;
+ctx.textAlign = 'center';
+
+if (ev.type === 'TimedAction' && ev.name) {
+  // TimedAction : type + name sur deux lignes
+  ctx.fillStyle = cfg.color;
+  ctx.fillText(ev.type, x, cfg.y);
+  const lineHeight = parseInt(cfg.font, 10) + 2;
+  ctx.fillText(ev.name, x, cfg.y + lineHeight);
+}
+else if (ev.type === 'Follow' && ev.displayName) {
+  // Follow : type + displayName sur deux lignes
+  ctx.fillStyle = cfg.color;
+  ctx.fillText(ev.type, x, cfg.y);
+  const lineHeight = parseInt(cfg.font, 10) + 2;
+  ctx.fillText(ev.displayName, x, cfg.y);
+}
+else {
+  // cas par défaut : un seul label (type)
+  ctx.fillStyle = cfg.color;
+  ctx.fillText(ev.type, x, cfg.y);
+}
 
       ctx.restore();
     });
