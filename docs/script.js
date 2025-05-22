@@ -96,7 +96,7 @@ if (event.source === 'Twitch') {
   }
 }
 
-    else if (event.source === 'General.Custom') {
+    else if (event.source === 'General') {
       if (data.widget === 'tts-catcher')              type = 'chat';
       else if (data.widget === 'tts-reader-selection') type = 'tts';
       else if (data.widget === 'tts-reader-tick')      type = 'tick';
