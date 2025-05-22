@@ -244,33 +244,7 @@ body {
     height: 50%;
 }
 
-.chat-section {
-    flex: 1 1 50%;
-    min-height: 0;
-    max-height: 50%;
-    background: var(--panel);
-    border-radius: 0 0 16px 16px;
-    margin-top: 0;
-    padding: 0 18px 16px 18px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
 
-/* dans #chat-log on passe en « flow normal » (plus de flex) */
-#chat-log {
-    display: block;          /* on désactive flex-direction: column */
-    padding: 12px 15px 10px 10px;
-    margin-top: 12px;
-    background: var(--chatbg);
-    border-radius: 10px;
-    box-shadow: 0 0 10px #0003;
-    height: 100%;
-    overflow-y: auto;
-    font-size: 1.13rem;
-    line-height: 1.3em;      /* légèrement serré */
-    white-space: pre-wrap;
-}
 
 /* ... Le reste du CSS inchangé ... */
 
@@ -298,29 +272,51 @@ body {
 .event-feed.show {
     display: block;
 }
+/*___________________________________CHAT_______________________________ */
+/* on veut un flux classique, pas de flex sur les messages */
+#chat-log {
+  display: block;
+  padding: 12px 15px 10px 10px;
+  margin-top: 12px;
+  background: var(--chatbg);
+  border-radius: 10px;
+  box-shadow: 0 0 10px #0003;
+  height: 100%;
+  overflow-y: auto;
+  font-size: 1.13rem;
+  line-height: 1.3;      /* compact */
+  white-space: pre-wrap;
+}
 
-
-/* chaque message */
+/* chaque message très serré */
 .chat-msg {
-    margin: 2px 0;           /* très peu d’espace entre messages */
-    padding: 0;              /* plus de padding superflu */
-    font-size: 1rem;
+  margin: 2px 0;
+  padding: 0;
+  font-size: 1rem;
 }
 
-/* si tu veux toujours colorer le pseudo */
-/* mais le pseudo est inline, on peut garder cette classe ou la virer */
+/* pseudo en couleur et block */
 .chat-msg .chat-usr {
-    color: var(--highlight);
+  display: block;
+  color: var(--highlight);
+  font-weight: bold;
+  margin-bottom: 0;
 }
 
-/* style particulier pour les TTS, si besoin */
+/* message en block juste en dessous */
+.chat-msg .chat-txt {
+  display: block;
+  margin-left: 4px;       /* petit retrait facultatif */
+}
+
+/* style spécifique TTS, si tu veux toujours le conserver */
 .chat-msg.chat-tts {
-    background: #182431;
-    border-left: 4px solid var(--accent);
-    padding-left: 8px;
-    border-radius: 3px;
-    color: #ffe791;
-    margin: 4px 0;           /* légèrement plus d’espace pour distinguer */
+  background: #182431;
+  border-left: 4px solid var(--accent);
+  padding-left: 8px;
+  border-radius: 3px;
+  color: #ffe791;
+  margin: 4px 0;
 }
 
 @media (max-width: 900px) {
