@@ -287,6 +287,7 @@ smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, optio
 
   // === 12) Event handler with full payload ===
   function handleCustomEvent({ type, time: eventTime, ...payload }) {
+console.log('EV RAW →', type, payload);
     const time = eventTime || Date.now();
 
     if (type === 'chat') {
