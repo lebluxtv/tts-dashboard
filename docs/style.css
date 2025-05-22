@@ -274,17 +274,17 @@ body {
 }
 /*___________________________________CHAT_______________________________ */
 .chat-section {
-  flex: 1 1 50%;
-  display: flex;
-  flex-direction: column;
+  flex: 1 1 50%;            /* occupe 50% de la colonne */
+  display: flex;            /* <--- */
+  flex-direction: column;   /* <--- */
   background: var(--panel);
-  padding: 0 18px 16px;
   border-radius: 0 0 16px 16px;
+  padding: 0 18px 16px;
 }
 
 #chat-log {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1;                  /* <--- prend tout l'espace restant */
+  overflow-y: auto;         /* <--- barre de scroll quand c'est plein */
   padding: 8px 12px;
   background: var(--chatbg);
   box-shadow: 0 0 10px #0003;
@@ -292,6 +292,7 @@ body {
   font-size: 1rem;
   line-height: 1.3;
   white-space: pre-wrap;
+  /* supprime height:100% s'il existe */
 }
 
 /* Chaque bloc pseudo+message */
