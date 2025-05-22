@@ -1,35 +1,40 @@
 /**
- * Patched wrapper to add `onDraw` hook to SmoothieChart without modifying original source.
- * Load this script after loading the official smoothie.js.
+ * Patched wrapper to add an `onDraw` hook to SmoothieChart without touching the
+ * original source. Load this **after** smoothie.js but **before** your script.js.
  */
-
-(function() {
-  // Wait until SmoothieChart is available
+;(function(){
+  // Retry until smoothie is loaded
   function patchOnDraw() {
-    if (typeof SmoothieChart === 'undefined' || !SmoothieChart.prototype.render) {
-      // retry shortly
-      return setTimeout(patchOnDraw, 100);
+    if (typeof SmoothieChart === 'undefined' || !SmoothieChart.prototype.start) {
+      return setTimeout(patchOnDraw, 50);
     }
 
-    // Monkey-patch render()
-    const origRender = SmoothieChart.prototype.render;
-    SmoothieChart.prototype.render = function(canvas, time) {
-      // call original render
-      origRender.call(this, canvas, time);
+    // Keep the original start()
+    const _origStart = SmoothieChart.prototype.start;
 
-      // then fire onDraw hook if defined
-      const opts = this.options;
-      if (opts && typeof opts.onDraw === 'function') {
-        opts.onDraw({
-          chart: this,
-          chartWidth: canvas.width,
-          chartHeight: canvas.height,
-          options: opts
-        });
-      }
+    // Override start() to wrap render()
+    SmoothieChart.prototype.start = function(){
+      // Bind original render
+      const chart = this;
+      const origRender = chart.render.bind(chart);
+
+      // Override render: call original, then onDraw()
+      chart.render = function(canvas, time){
+        origRender(canvas, time);
+        if (typeof chart.options.onDraw === 'function') {
+          try {
+            chart.options.onDraw(chart);
+          } catch(err) {
+            console.error('onDraw error:', err);
+          }
+        }
+      };
+
+      // Now call the real start loop
+      _origStart.call(chart);
     };
 
-    console.log('✅ SmoothieChart.prototype.render patched to support onDraw');
+    console.log('✅ SmoothieChart patched for onDraw hook');
   }
 
   patchOnDraw();
