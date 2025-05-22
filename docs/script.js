@@ -235,9 +235,7 @@ if (event.source === 'Twitch') {
 function renderChat() {
   const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
   if (!chatBuffer.length) {
-    chatDiv.innerHTML = `<div class="chat-msg empty">
-      <div class="chat-usr">Aucun message reçu</div>
-    </div>`;
+    chatDiv.innerHTML = `<div class="chat-msg empty"><div class="chat-usr">Aucun message reçu</div></div>`;
   } else {
     chatDiv.innerHTML = chatBuffer.slice(-100).map(m => {
       const cls = m.isTTS ? "chat-msg chat-tts" : "chat-msg";
@@ -251,6 +249,7 @@ function renderChat() {
   }
   if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
 }
+
 
 
 
