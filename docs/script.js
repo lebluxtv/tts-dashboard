@@ -90,55 +90,53 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1000);
 
  // --------------------- ADD CODE HERE (onDraw hookup) ---------------------
- // smoothie.options.onDraw = function(chart) {
- //   const now = Date.now();
- //   const px = chart.chartWidth;
- //    const mp = chart.options.millisPerPixel;
- //   console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp);
-   smoothie.options.onDraw = function({ chart, chartWidth: px, chartHeight: h, options: opts }) {
-    // event = { chart, chartWidth, chartHeight, options }
-    const now = Date.now();
-    const mp  = opts.millisPerPixel;
-    console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp, "height:", h);
+smoothie.options.onDraw = function({ chart, chartWidth: px, chartHeight: height, options: opts }) {
+  const now = Date.now();
+  const mp  = opts.millisPerPixel;      // speed
+  console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp, "height:", height);
 
-    eventsBuffer.forEach(ev => {
-      const t = new Date(ev.time).getTime();
-      const x = px - ((now - t) / mp);
-      if (x < 0 || x > px) return;
+  // get real 2D context from the underlying <canvas>
+  const ctx = chart.canvas.getContext('2d');
 
-      console.log("📈 Drawing event:", ev.type, "→ x:", x);
-      let color = "#5daaff";
-      switch (ev.type) {
-        case "tts": color = "#ffef61"; break;
-        case "chat": color = "#39c3ff"; break;
-        case "Follow": color = "#a7ff8e"; break;
-        case "Sub":
-        case "GiftSub":
-        case "GiftBomb": color = "#ff41b0"; break;
-        case "ReSub": color = "#28e7d7"; break;
-        case "Cheer": color = "#ffd256"; break;
-      }
+  eventsBuffer.forEach(ev => {
+    const t = new Date(ev.time).getTime();
+    const x = px - ((now - t) / mp);
+    if (x < 0 || x > px) return;
 
-      const ctx = chart.chart.ctx;
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = ev.type === "chat" ? 2 : 3;
-      ctx.beginPath();
-      ctx.moveTo(x, 5);
-      ctx.lineTo(x, chart.chartHeight - 5);
-      ctx.stroke();
+    let color = "#5daaff";
+    switch (ev.type) {
+      case "tts":      color = "#ffef61"; break;
+      case "chat":     color = "#39c3ff"; break;
+      case "Follow":   color = "#a7ff8e"; break;
+      case "Sub":
+      case "GiftSub":
+      case "GiftBomb": color = "#ff41b0"; break;
+      case "ReSub":    color = "#28e7d7"; break;
+      case "Cheer":    color = "#ffd256"; break;
+    }
 
-      ctx.beginPath();
-      if (ev.type === "tts")      ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
-      else if (ev.type === "chat") ctx.arc(x, chart.chartHeight - 12, 4, 0, 2 * Math.PI);
-      else if (ev.type === "Follow") ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
-      else                          ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+    console.log("📈 Drawing event:", ev.type, "→ x:", x);
 
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.restore();
-    });
-  };
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = (ev.type === "chat" ? 2 : 3);
+    ctx.beginPath();
+    ctx.moveTo(x, 5);
+    ctx.lineTo(x, height - 5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    if      (ev.type === "tts")    ctx.arc(x, height - 18, 8, 0, 2 * Math.PI);
+    else if (ev.type === "chat")   ctx.arc(x, height - 12, 4, 0, 2 * Math.PI);
+    else if (ev.type === "Follow") ctx.arc(x, height - 18, 6, 0, 2 * Math.PI);
+    else                            ctx.rect(x - 6, height - 25, 13, 13);
+
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  });
+};
+
   // ----------------- END OF NEW CODE ADDED -----------------
 
   smoothie.streamTo(oscillo, 0);
