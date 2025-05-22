@@ -157,36 +157,51 @@ smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, optio
   const overlaps = {};
 
   eventsBuffer.forEach(ev => {
-    const rawX = W - (now - ev.time) / mpp;
-    if (rawX < 0 || rawX > W) return;
-    const bucketX = Math.round(rawX / tolPx) * tolPx;
-    const idx     = overlaps[bucketX] || 0;
-    overlaps[bucketX] = idx + 1;
+  const rawX    = W - (now - ev.time) / mpp;
+  if (rawX < 0 || rawX > W) return;
+  const bucketX = Math.round(rawX / tolPx) * tolPx;
+  const idx     = overlaps[bucketX] || 0;
+  overlaps[bucketX] = idx + 1;
 
-    const { color, width } = getStyleFor(ev.type);
+  const { color, width } = getStyleFor(ev.type);
 
+  /* After Debug Zone Start
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = width;
+
+  // — draw vertical bar at rawX
+  ctx.beginPath();
+  ctx.moveTo(rawX, 5);
+  ctx.lineTo(rawX, H - 5);
+  ctx.stroke();
+
+  // — draw icon at rawX
+  ctx.beginPath();
+  drawIcon(ev.type, ctx, rawX, H);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // — draw label at rawX, offset by idx
+  drawLabel(ev, ctx, rawX, idx);
+
+  ctx.restore();
+  After Debug Zone End */
+
+  // ↓-↓-↓ Debug Start ↓-↓-↓
+  // debug: highlight chat bars in red
+  if (ev.type === 'chat') {
     ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth   = width;
-
-    // — draw vertical bar at rawX
+    ctx.strokeStyle = 'rgba(255,0,0,0.8)';
+    ctx.lineWidth   = 3;
     ctx.beginPath();
     ctx.moveTo(rawX, 5);
     ctx.lineTo(rawX, H - 5);
     ctx.stroke();
-
-    // — draw icon at rawX
-    ctx.beginPath();
-    drawIcon(ev.type, ctx, rawX, H);
-    ctx.fillStyle = color;
-    ctx.fill();
-
-    // — draw label at rawX, offset by idx
-    drawLabel(ev, ctx, rawX, idx);
-
     ctx.restore();
-  });
-};
+  }
+  // ↑-↑-↑ Debug End ↑-↑-↑
+});
 
   smoothie.streamTo(oscillo, 0);
 
