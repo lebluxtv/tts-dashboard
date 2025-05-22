@@ -118,6 +118,41 @@ document.addEventListener('DOMContentLoaded', () => {
       ...data
     });
   });
+// -----------------------------------------------------------------------------------------
+const labelConfig = {
+  // Custom
+  tts:   { y: 20, font: '10px sans-serif', color: '#ffef61' },
+  chat:  { y: 12, font: '10px sans-serif', color: 'rgba(57,195,255,1)' },
+
+  // Twitch
+  Follow:                    { y: 15, font: '10px sans-serif', color: '#a7ff8e' },
+  Raid:                      { y: 15, font: '10px sans-serif', color: '#ffae42' },
+  AdRun:                     { y: 15, font: '10px sans-serif', color: '#ffaa00' },
+  Sub:                       { y: 15, font: '10px sans-serif', color: '#ff41b0' },
+  ReSub:                     { y: 15, font: '10px sans-serif', color: '#28e7d7' },
+  GiftSub:                   { y: 15, font: '10px sans-serif', color: '#ff71ce' },
+  GiftBomb:                  { y: 15, font: '10px sans-serif', color: '#ff1f8b' },
+  Cheer:                     { y: 15, font: '10px sans-serif', color: '#ffd256' },
+  HypeTrainStart:            { y: 15, font: '10px sans-serif', color: '#ff6b6b' },
+  HypeTrainUpdate:           { y: 15, font: '10px sans-serif', color: '#ff5252' },
+  HypeTrainLevelUp:          { y: 15, font: '10px sans-serif', color: '#ff3b3b' },
+  HypeTrainEnd:              { y: 15, font: '10px sans-serif', color: '#ff2424' },
+  RewardRedemption:          { y: 15, font: '10px sans-serif', color: '#8e44ad' },
+  RewardCreated:             { y: 15, font: '10px sans-serif', color: '#9b59b6' },
+  RewardUpdated:             { y: 15, font: '10px sans-serif', color: '#71368a' },
+  RewardDeleted:             { y: 15, font: '10px sans-serif', color: '#5e3370' },
+  CommunityGoalContribution: { y: 15, font: '10px sans-serif', color: '#2ecc71' },
+  CommunityGoalEnded:        { y: 15, font: '10px sans-serif', color: '#27ae60' },
+  PollCreated:               { y: 15, font: '10px sans-serif', color: '#3498db' },
+  PollUpdated:               { y: 15, font: '10px sans-serif', color: '#2980b9' },
+  PollEnded:                 { y: 15, font: '10px sans-serif', color: '#1f618d' },
+
+  // Misc
+  TimedAction:               { y: 15, font: '10px sans-serif', color: '#95a5a6' },
+
+  // fallback
+  default:                   { y: 12, font: '10px sans-serif', color: '#ffffff' }
+};
 
   // === 4) resize canvas ===
   function resizeOscillo() {
@@ -158,16 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
      // Valeurs par défaut
     let color = "#888888";
-    let width = 3;
+    let width = 2;
 
       switch (ev.type) {
         // Custom
-        case 'tts':   color = '#ffef61'; break;
-        case "chat":
-        color = "rgba(57, 195, 255, 0.4)"; // opacity 0.4
-        width = 1;                         // plus fin
-        break;
-
+        case 'tts':                       color = '#ffef61'; break;
+        case "chat":                      color = "rgba(57, 195, 255, 0.4)";   width = 1;   break;
         // Twitch
         case 'Follow':                    color = '#a7ff8e'; break;
         case 'Raid':                      color = '#ffae42'; break;
@@ -191,13 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'PollUpdated':               color = '#2980b9'; break;
         case 'PollEnded':                 color = '#1f618d'; break;
         // Misc
-        case 'TimedAction': color = '#95a5a6'; break;
-        default:            color = '#888888';
+        case 'TimedAction':               color = '#95a5a6'; break;
+        default:                          color = '#888888';
       }
 
       ctx.save();
       ctx.strokeStyle = color;
-       ctx.lineWidth   = width;
+      ctx.lineWidth   = width;
       ctx.beginPath();
       ctx.moveTo(x, 5);
       ctx.lineTo(x, H - 5);
@@ -207,9 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if      (ev.type === 'tts')    ctx.arc(x, H - 18, 8, 0, 2 * Math.PI);
       else if (ev.type === 'chat')   ctx.arc(x, H - 12, 4, 0, 2 * Math.PI);
       else if (ev.type === 'Follow') ctx.arc(x, H - 18, 6, 0, 2 * Math.PI);
-      else                            ctx.rect(x - 6, H - 25, 13, 13);
+      else                           ctx.rect(x - 6, H - 25, 13, 13);
       ctx.fillStyle = color;
       ctx.fill();
+
+
+    // -- ajout du label à la hauteur définie dans labelConfig --
+    const cfg = labelConfig[ev.type] || { y: 3, font: '10px sans-serif', color: '#fff' };
+    ctx.font      = cfg.font;
+    ctx.fillStyle = cfg.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(ev.type, x, cfg.y);
+
       ctx.restore();
     });
   };
@@ -242,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimelineWindow(val === 'adapt' ? 'adapt' : 'scale', parseInt(val, 10));
   }));
 
-  // --- chat rendering helper ---
+
 // --- chat rendering helper ---
 function renderChat() {
   const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
@@ -251,7 +291,6 @@ function renderChat() {
   } else {
     chatDiv.innerHTML = chatBuffer.slice(-100).map(m => {
       const cls = m.isTTS ? 'chat-msg chat-tts' : 'chat-msg';
-      // on colle tout sur une seule ligne JS, pour éviter les retours invisibles
       return '<div class="' + cls + '">' +
                '<span class="chat-usr">' + m.user + ':</span>' +
                '<span class="chat-text">' + m.message + '</span>' +
@@ -261,31 +300,6 @@ function renderChat() {
   if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
-/*
-  function renderChat() {
-    const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
-    if (!chatBuffer.length) {
-      chatDiv.innerHTML = `
-        <div class="chat-msg empty">
-          <span class="chat-usr">…</span>
-          <span class="chat-text">Aucun message reçu</span>
-        </div>`;
-    } else {
-      chatDiv.innerHTML = chatBuffer
-        .slice(-100)
-        .map(m => {
-          const cls = m.isTTS ? 'chat-msg chat-tts' : 'chat-msg';
-          return `
-            <div class="${cls}">
-              <span class="chat-usr">${m.user}:</span>
-              <span class="chat-text">${m.message}</span>
-            </div>`;
-        })
-        .join('');
-    }
-    if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
-  }
-*/
   // --- TTS header + progress bar ---
   function setTtsHeader(user, msg) {
     ttsHeader.innerHTML = `<span style="color:#a5ffef">${user}</span> : ${msg}`;
