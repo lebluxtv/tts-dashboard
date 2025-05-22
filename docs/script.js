@@ -78,20 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 else if (event.source === 'General') {
-  if (data.widget === 'tts-catcher' && data.eventType === 'message') {
-    type = 'chat';
-  }
-  else if (data.widget === 'tts-reader-selection') {
-    type = 'tts';
-  }
-  else if (data.widget === 'tts-reader-tick') {
-    type = 'tick';
-  }
-  else {
-    // on ignore tout le reste venant du General
-    return;
-  }
+  if      (data.widget === 'tts-catcher')          type = 'chat';
+  else if (data.widget === 'tts-reader-selection') type = 'tts';
+  else if (data.widget === 'tts-reader-tick')      type = 'tick';
+  else return;
 }
+
     else if (event.source === 'Misc') {
       if (event.type === 'TimedAction') type = 'TimedAction';
       else return;
@@ -335,7 +327,7 @@ function getStyleFor(type) {
   switch (type) {
     // Custom
     case 'tts':      color = '#ffef61';      break;
-    case 'chat':      color = 'rgba(57,195,255,0.4)';      width = 1;      break;
+    case 'chat':      color = 'rgba(57,195,255,0.7)';      width = 1;      break;
 
     // Twitch
     case 'Cheer':      color = '#ffd256';      break;
