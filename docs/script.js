@@ -79,67 +79,69 @@ document.addEventListener('DOMContentLoaded', () => {
     timestampFormatter: SmoothieChart.timeFormatter
   });
 
-  // 👇 Ajoute une TimeSeries fictive pour activer le "render loop"
-  const dummySeries = new TimeSeries();
-  smoothie.addTimeSeries(dummySeries, {
-    strokeStyle: 'rgba(0,0,0,0)',
-    lineWidth: 0
-  });
-  setInterval(() => {
-    dummySeries.append(Date.now(), 0);
-  }, 1000);
+// --------------------- COPY OF ORIGINAL BLOCK ---------------------
+// 👇 Ajoute une TimeSeries fictive pour activer le "render loop"
+const dummySeries = new TimeSeries();
+smoothie.addTimeSeries(dummySeries, {
+  strokeStyle: 'rgba(0,0,0,0)',
+  lineWidth: 0
+});
+setInterval(() => {
+  dummySeries.append(Date.now(), 0);
+}, 1000);
 
- // --------------------- ADD CODE HERE (onDraw hookup) ---------------------
-smoothie.options.onDraw = function({ chart, chartWidth: px, chartHeight: height, options: opts }) {
+// --------------------- ADD CODE HERE (onDraw hookup) ---------------------
+smoothie.options.onDraw = function(drawInfo) {
+  // drawInfo is { chart, chartWidth, chartHeight, options }
+  const chart = drawInfo.chart;
+  const px = drawInfo.chartWidth;
+  const mp = drawInfo.options.millisPerPixel;
+  const height = drawInfo.chartHeight;
   const now = Date.now();
-  const mp  = opts.millisPerPixel;      // speed
   console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp, "height:", height);
-
-  // get real 2D context from the underlying <canvas>
-  const ctx = chart.canvas.getContext('2d');
 
   eventsBuffer.forEach(ev => {
     const t = new Date(ev.time).getTime();
     const x = px - ((now - t) / mp);
     if (x < 0 || x > px) return;
 
+    console.log("📈 Drawing event:", ev.type, "→ x:", x);
     let color = "#5daaff";
     switch (ev.type) {
-      case "tts":      color = "#ffef61"; break;
-      case "chat":     color = "#39c3ff"; break;
-      case "Follow":   color = "#a7ff8e"; break;
+      case "tts": color = "#ffef61"; break;
+      case "chat": color = "#39c3ff"; break;
+      case "Follow": color = "#a7ff8e"; break;
       case "Sub":
       case "GiftSub":
       case "GiftBomb": color = "#ff41b0"; break;
-      case "ReSub":    color = "#28e7d7"; break;
-      case "Cheer":    color = "#ffd256"; break;
+      case "ReSub": color = "#28e7d7"; break;
+      case "Cheer": color = "#ffd256"; break;
     }
 
-    console.log("📈 Drawing event:", ev.type, "→ x:", x);
-
+    const ctx = chart.chart.ctx; // the actual canvas context
     ctx.save();
     ctx.strokeStyle = color;
-    ctx.lineWidth   = (ev.type === "chat" ? 2 : 3);
+    ctx.lineWidth = ev.type === "chat" ? 2 : 3;
     ctx.beginPath();
     ctx.moveTo(x, 5);
     ctx.lineTo(x, height - 5);
     ctx.stroke();
 
     ctx.beginPath();
-    if      (ev.type === "tts")    ctx.arc(x, height - 18, 8, 0, 2 * Math.PI);
-    else if (ev.type === "chat")   ctx.arc(x, height - 12, 4, 0, 2 * Math.PI);
+    if (ev.type === "tts")      ctx.arc(x, height - 18, 8, 0, 2 * Math.PI);
+    else if (ev.type === "chat") ctx.arc(x, height - 12, 4, 0, 2 * Math.PI);
     else if (ev.type === "Follow") ctx.arc(x, height - 18, 6, 0, 2 * Math.PI);
-    else                            ctx.rect(x - 6, height - 25, 13, 13);
+    else                          ctx.rect(x - 6, height - 25, 13, 13);
 
     ctx.fillStyle = color;
     ctx.fill();
     ctx.restore();
   });
 };
+// ----------------- END OF NEW CODE ADDED -----------------
 
-  // ----------------- END OF NEW CODE ADDED -----------------
+smoothie.streamTo(oscillo, 0);
 
-  smoothie.streamTo(oscillo, 0);
 
   // --- Timeline Mode ---
   function setTimelineWindow(mode, seconds = 60) {
