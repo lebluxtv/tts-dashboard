@@ -232,25 +232,29 @@ if (event.source === 'Twitch') {
 
 
   // --- chat rendering helper ---
-  function renderChat(){
-    const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight+20;
-    if(!chatBuffer.length){
-      chatDiv.innerHTML = `<div style="opacity:.5;text-align:center;">Aucun message reçu</div>`;
-    } else {
-      chatDiv.innerHTML = chatBuffer.slice(-100).map(m=>{
-        if(m.isTTS){
-          return `<div class="chat-msg chat-tts">[TTS] 
-            <span class="chat-usr">${m.user}</span> : ${m.message}
-          </div>`;
-        }
-        return `<div class="chat-msg">
-          <span class="chat-usr">${m.user}</span> : ${m.message}
-          ${m.eligible? '' : '<span style="opacity:.5;">(non éligible)</span>'}
+function renderChat() {
+  const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
+  if (!chatBuffer.length) {
+    chatDiv.innerHTML = `<div class="chat-msg empty">Aucun message reçu</div>`;
+  } else {
+    chatDiv.innerHTML = chatBuffer.slice(-100).map(m => {
+      // pour le TTS, on garde ton style actuel
+      if (m.isTTS) {
+        return `<div class="chat-msg chat-tts">
+          ${m.user}:<br>
+          ${m.message}
         </div>`;
-      }).join('');
-    }
-    if(atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
+      }
+      // messages normaux
+      return `<div class="chat-msg">
+        ${m.user}:<br>
+        ${m.message}
+      </div>`;
+    }).join('');
   }
+  if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
 
 
   // --- TTS header + progress bar ---
