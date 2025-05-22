@@ -382,8 +382,12 @@ function getStyleFor(type) {
     ctx.textAlign = 'center';
     ctx.fillStyle = cfg.color;
 
+if (ev.type === 'chat') {
+    // on affiche la barre, mais pas le label
+    return;
+  }
 // TimedAction : 2 lignes (type + name)
-    if (ev.type==='TimedAction' && ev.name) {
+   else if (ev.type==='TimedAction' && ev.name) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.name, x, baseY + lineHeight);
     }
