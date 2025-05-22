@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 3) Dispatch centralisé et normalisation en `type` ===
   client.on('*', ({ event, data }) => {
-    let type = null;
-
+   let type = null,
+time = Date.now();
 if (event.source === 'Twitch') {
   switch (event.type) {
     // — Chat
@@ -64,10 +64,10 @@ if (event.source === 'Twitch') {
     case 'AdRun':                type = 'AdRun';   break;
 
     // — Subs
-    case 'Subscriptions':        type = 'Sub'; break;
-    case 'Resub':                type = 'ReSub';   break;
-    case 'GiftSub':              type = 'GiftSub'; break;
-    case 'GiftBomb':             type = 'GiftBomb'; break;
+    case 'Sub':       type = 'Sub';     break;
+    case 'ReSub':     type = 'ReSub';   break;
+    case 'GiftSub':   type = 'GiftSub'; break;
+    case 'GiftBomb':  type = 'GiftBomb';break;
 
     // — Hype train
     case 'HypeTrainStart':       type = 'HypeTrainStart';  break;
@@ -109,7 +109,7 @@ if (event.source === 'Twitch') {
     else return;
 
     // dispatch vers ton handler
-    handleCustomEvent({ type, ...data });
+    handleCustomEvent({ type, time, ...data });
   });
 
   // === 4) resize canvas ===
