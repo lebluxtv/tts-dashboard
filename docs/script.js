@@ -11,8 +11,7 @@ const client = new StreamerbotClient({
 
         try {
             await client.subscribe('General.Custom');
-            //await client.subscribe('Broadcast.Custom');
-            console.log("📡 Subscriptions General.Custom et Broadcast.Custom envoyées.");
+            console.log("📡 Subscriptions General.Custom envoyées.");
         } catch (err) {
             console.warn("⚠️ Abonnement manuel échoué :", err.message);
         }
@@ -76,12 +75,25 @@ smoothie.streamTo(oscillo, 0);
 smoothie.options.onDraw = function (chart) {
     const now = Date.now();
     const px = chart.chartWidth;
-    const mp = chart.options.millisPerPixel;
-    const windowMillis = px * mp;
+    const mp = chart.options.millisPerPixel || 60;
+    const ctx = chart.chart.ctx;
+
+    // DEBUG:
+    console.log("🟢 [onDraw] Chart draw", {
+        chartWidth: px,
+        millisPerPixel: mp,
+        eventsCount: eventsBuffer.length
+    });
 
     eventsBuffer.forEach(ev => {
+        if (!ev?.time || !ev.type) return;
+
         const t = new Date(ev.time).getTime();
         const x = px - ((now - t) / mp);
+        if (isNaN(x)) {
+            console.warn("⚠️ [onDraw] Invalid timestamp for event:", ev);
+            return;
+        }
         if (x < 0 || x > px) return;
 
         let color = "#5daaff";
@@ -94,20 +106,24 @@ smoothie.options.onDraw = function (chart) {
             case "Cheer": color = "#ffd256"; break;
         }
 
-        const ctx = chart.chart.ctx;
         ctx.save();
         ctx.strokeStyle = color;
-        ctx.lineWidth = ev.type === "chat" ? 2 : 3;
+        ctx.lineWidth = (ev.type === "chat") ? 2 : 3;
         ctx.beginPath();
         ctx.moveTo(x, 5);
         ctx.lineTo(x, chart.chartHeight - 5);
         ctx.stroke();
 
         ctx.beginPath();
-        if (ev.type === "tts") ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
-        else if (ev.type === "chat") ctx.arc(x, chart.chartHeight - 12, 4, 0, 2 * Math.PI);
-        else if (ev.type === "Follow") ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
-        else ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+        if (ev.type === "tts") {
+            ctx.arc(x, chart.chartHeight - 18, 8, 0, 2 * Math.PI);
+        } else if (ev.type === "chat") {
+            ctx.arc(x, chart.chartHeight - 12, 4, 0, 2 * Math.PI);
+        } else if (ev.type === "Follow") {
+            ctx.arc(x, chart.chartHeight - 18, 6, 0, 2 * Math.PI);
+        } else {
+            ctx.rect(x - 6, chart.chartHeight - 25, 13, 13);
+        }
 
         ctx.fillStyle = color;
         ctx.fill();
