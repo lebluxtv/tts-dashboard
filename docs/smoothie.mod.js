@@ -837,15 +837,6 @@
   };
 
   SmoothieChart.prototype.render = function(canvas, time) {
-	  if (this.options && typeof this.options.onDraw === "function") {
-  this.options.onDraw({
-    chartWidth: canvas.width,
-    chartHeight: canvas.height,
-    chart: this,
-    options: this.options
-  });
-}
-
     var chartOptions = this.options,
         nowMillis = Date.now();
 
@@ -1075,6 +1066,14 @@
       }
 
       context.restore();
+// ——— AJOUT onDraw ———
+if (typeof chartOptions.onDraw === 'function') {
+    chartOptions.onDraw({
+        chart: this,
+        chartWidth: canvas.width,
+        chartHeight: canvas.height,
+        options: chartOptions
+    });
     }
 
     if (chartOptions.tooltip && this.mouseX >= 0) {
