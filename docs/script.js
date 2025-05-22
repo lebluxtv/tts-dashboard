@@ -1,34 +1,65 @@
-// script.js
-document.addEventListener('DOMContentLoaded', () => {
-
-// === 2) Your existing Streamer.bot + UI wiring ===
-
-  const client = new StreamerbotClient({
-    host: '127.0.0.1',
-    port: 8080,
-    endpoint: '/',
-    password: 'streamer.bot',
-    onConnect: async data => {
-      console.log("✅ WebSocket connecté !", data);
-      statusDot.classList.replace('offline','online');
-      try {
-        await client.subscribe('General.Custom');
-        console.log("📡 Subscriptions General.Custom envoyées.");
-      } catch (e) {
-        console.warn("⚠️ Abonnement manuel échoué :", e.message);
-      }
-      try {
-        const resp = await client.getActiveViewers();
-        viewerCountSpan.textContent = resp.viewers.length ? `👀 ${resp.viewers.length}` : '';
-        viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
-      } catch { viewerCountSpan.textContent = ''; }
-    },
-    onDisconnect: () => {
-      console.log("🔌 WebSocket déconnecté !");
-      statusDot.classList.replace('online','offline');
+// === Abonnement « tous » events & dispatch centralisé ===
+const client = new StreamerbotClient({
+  host: '127.0.0.1',
+  port: 8080,
+  endpoint: '/',
+  password: 'streamer.bot',
+  subscribe: '*',    // ← abonne à TOUT : Twitch, Custom, etc.
+  onConnect: async data => {
+    console.log("✅ WebSocket connecté !", data);
+    statusDot.classList.replace('offline','online');
+    try {
+      const resp = await client.getActiveViewers();
+      viewerCountSpan.textContent = resp.viewers.length ? `👀 ${resp.viewers.length}` : '';
+      viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
+    } catch {
       viewerCountSpan.textContent = '';
     }
-  });
+  },
+  onDisconnect: () => {
+    console.log("🔌 WebSocket déconnecté !");
+    statusDot.classList.replace('online','offline');
+    viewerCountSpan.textContent = '';
+  }
+});
+
+// Écoute **tous** les events, normalise & redispatche vers handleCustomEvent
+client.on('*', ({ event, data }) => {
+  // event.source = "Twitch" | "Custom" | etc.
+  // event.type   = Twitch-specific type, ou Custom widget name, etc.
+  let type = null;
+
+  if (event.source === 'Twitch') {
+    switch (event.type) {
+      case 'ChannelMessage':         type = 'chat';      break;
+      case 'Follow':                 type = 'Follow';    break;
+      case 'Subscription':           type = data.isResub ? 'ReSub' : 'Sub'; break;
+      case 'GiftSubscription':       type = 'GiftSub';   break;
+      case 'MassGiftSubscription':   type = 'GiftBomb';  break;
+      case 'Cheer':                  type = 'Cheer';     break;
+      // … ajoute d’autres cas Twitch si tu veux …
+      default:                       type = event.type;  break;
+    }
+  }
+  else if (event.source === 'Custom') {
+    // widget Custom.*
+    switch (data.widget) {
+      case 'tts-catcher':             type = 'chat';      break;
+      case 'tts-reader-selection':    type = 'tts';       break;
+      case 'tts-reader-tick':         type = 'tick';      break;
+      default:                        return; /* ignore autres Custom */
+    }
+  }
+  else {
+    // ignore tout le reste (StreamLabs, OBS, etc.), ou bien gère-les ici
+    return;
+  }
+
+  console.log(`📨 [${event.source}.${event.type}] → normalized type "${type}"`, data);
+  // On transmet à ton handler existant
+  handleCustomEvent({ type, ...data });
+});
+
 
   // UI refs
   const statusDot      = document.getElementById('status-dot');
