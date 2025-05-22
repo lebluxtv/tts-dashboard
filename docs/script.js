@@ -70,7 +70,14 @@ const smoothie = new SmoothieChart({
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
 });
+// 👇 Ajoute une TimeSeries fictive pour activer le "render loop" de SmoothieChart !
+const dummySeries = new TimeSeries();
+smoothie.addTimeSeries(dummySeries, { strokeStyle: 'rgba(0,0,0,0)', lineWidth: 0 });
+// Optionnel : ajoute un point toutes les X secondes, invisible à l’œil
 
+setInterval(() => {
+    dummySeries.append(Date.now(), 0); // N'importe quelle valeur, jamais affichée
+}, 1000); // toutes les secondes
 // ✅ Le bloc onDraw doit venir AVANT streamTo
 smoothie.options.onDraw = function (chart) {
     const now = Date.now();
