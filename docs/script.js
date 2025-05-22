@@ -156,11 +156,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const x = W - (now - t) / mpp;
       if (x < 0 || x > W) return;
 
-      let color;
+     // Valeurs par défaut
+    let color = "#888888";
+    let width = 3;
+
       switch (ev.type) {
         // Custom
         case 'tts':   color = '#ffef61'; break;
-        case 'chat':  color = '#39c3ff'; break;
+        case "chat":
+        color = "rgba(57, 195, 255, 0.4)"; // opacity 0.4
+        width = 1;                         // plus fin
+        break;
+
         // Twitch
         case 'Follow':                    color = '#a7ff8e'; break;
         case 'Raid':                      color = '#ffae42'; break;
@@ -190,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ctx.save();
       ctx.strokeStyle = color;
-      ctx.lineWidth   = (ev.type === 'chat') ? 2 : 3;
+       ctx.lineWidth   = width;
       ctx.beginPath();
       ctx.moveTo(x, 5);
       ctx.lineTo(x, H - 5);
