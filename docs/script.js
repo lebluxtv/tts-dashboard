@@ -70,7 +70,7 @@ const smoothie = new SmoothieChart({
     labels: { fillStyle: '#ececec', fontSize: 14, precision: 0 },
     timestampFormatter: SmoothieChart.timeFormatter
 });
-smoothie.streamTo(oscillo, 0);
+
 
 smoothie.options.onDraw = function (chart) {
     const now = Date.now();
@@ -117,7 +117,7 @@ smoothie.options.onDraw = function (chart) {
         ctx.restore();
     });
 };
-
+smoothie.streamTo(oscillo, 0);
 // --- Timeline Mode ---
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
