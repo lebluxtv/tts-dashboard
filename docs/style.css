@@ -273,18 +273,17 @@ body {
     display: block;
 }
 /*___________________________________CHAT_______________________________ */
-/* == 1) Le conteneur reste à 50% hauteur, scroll interne == */
 .chat-section {
   flex: 1 1 50%;
-  display: flex;            /* pour que #chat-log soit un flex item */
+  display: flex;
   flex-direction: column;
   background: var(--panel);
   padding: 0 18px 16px;
   border-radius: 0 0 16px 16px;
 }
-/* 2) Le log !! prend TOUT l’espace disponible et scroll interne !! */
+
 #chat-log {
-  flex: 1;                  /* c’est lui qui pousse et défile */
+  flex: 1;
   overflow-y: auto;
   padding: 8px 12px;
   background: var(--chatbg);
@@ -295,39 +294,26 @@ body {
   white-space: pre-wrap;
 }
 
-/* 3) Chaque message : un petit gap entre blocs */
+/* Chaque bloc pseudo+message */
 .chat-msg {
-  margin: 0 0 4px;         /* 4px entre chaque pseudo+texte */
+  margin: 0 0 4px;    /* 4px sous chaque bloc */
 }
 
-/* 4) Pseudo et texte sans marge interne */
-.chat-msg .chat-usr,
-.chat-msg .chat-text {
+/* Pseudo sur sa ligne, sans marge */
+.chat-msg .chat-usr {
+  display: block;
   margin: 0;
   padding: 0;
-  display: block;
-}
-/* 5) Colorisation du pseudo */
-.chat-msg .chat-usr {
   color: var(--highlight);
   font-weight: bold;
 }
 
-/* message juste en dessous, pas d’espace au-dessus */
+/* Message immédiatement sous le pseudo, sans marge */
 .chat-msg .chat-text {
   display: block;
-  margin: 0;                /* zero margin top/bottom */
+  margin: 0;
   padding: 0;
   color: var(--text);
-}
-
-/* 6) Style TTS si nécessaire */
-.chat-msg.chat-tts {
-  background: #182431;
-  border-left: 4px solid var(--accent);
-  padding: 4px 8px;
-  border-radius: 3px;
-  margin-bottom: 6px;      /* un poil plus d’espace après un TTS */
 }
 
 
