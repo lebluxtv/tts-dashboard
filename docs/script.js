@@ -64,7 +64,7 @@ if (event.source === 'Twitch') {
     case 'AdRun':                type = 'AdRun';   break;
 
     // — Subs
-    case 'Subscription':         type = 'Sub'; break;
+    case 'Sub':         type = 'Sub'; break;
     case 'Resub':                type = 'ReSub';   break;
     case 'GiftSub':              type = 'GiftSub'; break;
     case 'GiftBomb':             type = 'GiftBomb'; break;
