@@ -79,7 +79,8 @@ setInterval(() => {
     dummySeries.append(Date.now(), 0); // N'importe quelle valeur, jamais affichée
 }, 1000); // toutes les secondes
 // ✅ Le bloc onDraw doit venir AVANT streamTo
-smoothie.options.onDraw = function (chart) {
+smoothie.options.onDraw = function(chart) {
+  console.log("🟢 onDraw triggered", Date.now());
     const now = Date.now();
     const px = chart.chartWidth;
     const mp = chart.options.millisPerPixel;
