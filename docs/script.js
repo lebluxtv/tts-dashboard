@@ -89,12 +89,17 @@ document.addEventListener('DOMContentLoaded', () => {
     dummySeries.append(Date.now(), 0);
   }, 1000);
 
-  // --------------------- ADD CODE HERE (onDraw hookup) ---------------------
-  smoothie.options.onDraw = function(chart) {
+ // --------------------- ADD CODE HERE (onDraw hookup) ---------------------
+ // smoothie.options.onDraw = function(chart) {
+ //   const now = Date.now();
+ //   const px = chart.chartWidth;
+ //    const mp = chart.options.millisPerPixel;
+ //   console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp);
+   smoothie.options.onDraw = function({ chart, chartWidth: px, chartHeight: h, options: opts }) {
+    // event = { chart, chartWidth, chartHeight, options }
     const now = Date.now();
-    const px = chart.chartWidth;
-    const mp = chart.options.millisPerPixel;
-    console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp);
+    const mp  = opts.millisPerPixel;
+    console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp, "height:", h);
 
     eventsBuffer.forEach(ev => {
       const t = new Date(ev.time).getTime();
