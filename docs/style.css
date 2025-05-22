@@ -257,20 +257,19 @@ body {
     flex-direction: column;
 }
 
+/* dans #chat-log on passe en « flow normal » (plus de flex) */
 #chat-log {
+    display: block;          /* on désactive flex-direction: column */
+    padding: 12px 15px 10px 10px;
+    margin-top: 12px;
     background: var(--chatbg);
     border-radius: 10px;
-    margin-top: 12px;
-    padding: 12px 15px 10px 10px;
-    font-size: 1.13rem;
-    color: var(--text);
-    height: 100%;
-    max-height: 100%;
-    overflow-y: auto;
     box-shadow: 0 0 10px #0003;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    height: 100%;
+    overflow-y: auto;
+    font-size: 1.13rem;
+    line-height: 1.3em;      /* légèrement serré */
+    white-space: pre-wrap;
 }
 
 /* ... Le reste du CSS inchangé ... */
@@ -300,17 +299,28 @@ body {
     display: block;
 }
 
+
+/* chaque message */
 .chat-msg {
-    margin-bottom: 2px;
-    white-space: pre-wrap;
+    margin: 2px 0;           /* très peu d’espace entre messages */
+    padding: 0;              /* plus de padding superflu */
+    font-size: 1rem;
 }
-.chat-usr { color: var(--highlight); }
+
+/* si tu veux toujours colorer le pseudo */
+/* mais le pseudo est inline, on peut garder cette classe ou la virer */
+.chat-msg .chat-usr {
+    color: var(--highlight);
+}
+
+/* style particulier pour les TTS, si besoin */
 .chat-msg.chat-tts {
     background: #182431;
     border-left: 4px solid var(--accent);
     padding-left: 8px;
     border-radius: 3px;
     color: #ffe791;
+    margin: 4px 0;           /* légèrement plus d’espace pour distinguer */
 }
 
 @media (max-width: 900px) {
