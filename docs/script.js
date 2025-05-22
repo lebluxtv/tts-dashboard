@@ -372,18 +372,27 @@ function getStyleFor(type) {
     ctx.font      = cfg.font;
     ctx.textAlign = 'center';
     ctx.fillStyle = cfg.color;
-// TimedAction : deux lignes (type + name)
+
+// TimedAction : 2 lignes (type + name)
     if (ev.type==='TimedAction' && ev.name) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.name, x, baseY + lineHeight);
     }
-// Follow : deux lignes (type + displayName)
+
+// Follow : 2 lignes (type + displayName)
     else if (ev.type==='Follow' && ev.displayName) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.displayName, x, baseY + lineHeight);
     }
+
+// Cheer : 3 lignes (type + <n> bits + displayName)
+    else if (ev.type === 'Cheer' && ev.message && ev.message.hasBits) {
+      ctx.fillText(ev.type, x, baseY);
+      ctx.fillText(`${ev.message.bits} bits`, x, baseY + lineHeight);
+      ctx.fillText(ev.message.displayName, x, baseY + lineHeight * 2);
+
+// Default : 1 ligne (type)    
     else {
-// Default : une seule ligne (type)
       ctx.fillText(ev.type, x, baseY);
     }
   }
