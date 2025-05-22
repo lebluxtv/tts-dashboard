@@ -234,30 +234,27 @@ if (event.source === 'Twitch') {
   // --- chat rendering helper ---
 function renderChat() {
   const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
-
   if (!chatBuffer.length) {
     chatDiv.innerHTML = `<div class="chat-msg empty">Aucun message reçu</div>`;
   } else {
     chatDiv.innerHTML = chatBuffer.slice(-100).map(m => {
-      // TTS
       if (m.isTTS) {
         return `
-          <div class="chat-msg chat-tts">
-            <span class="chat-usr">${m.user} :</span>
-            <span class="chat-txt">${m.message}</span>
-          </div>`;
-      }
-      // chat normal
-      return `
-        <div class="chat-msg">
-          <span class="chat-usr">${m.user} :</span>
-          <span class="chat-txt">${m.message}</span>
+        <div class="chat-msg chat-tts">
+          <div class="chat-usr">${m.user}:</div>
+          <div class="chat-text">${m.message}</div>
         </div>`;
+      }
+      return `
+      <div class="chat-msg">
+        <div class="chat-usr">${m.user}:</div>
+        <div class="chat-text">${m.message}</div>
+      </div>`;
     }).join('');
   }
-
   if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
 }
+
 
 
 
