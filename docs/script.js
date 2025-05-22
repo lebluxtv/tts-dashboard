@@ -1,7 +1,7 @@
 // script.js
 document.addEventListener('DOMContentLoaded', () => {
 
-  // === 1) Monkey-patch SmoothieChart to expose an onDraw(chart) hook ===
+  /* === 1) Monkey-patch SmoothieChart to expose an onDraw(chart) hook ===
   (function patchSmoothieOnDraw() {
     if (typeof SmoothieChart === 'undefined' || !SmoothieChart.prototype.render) {
       return setTimeout(patchSmoothieOnDraw, 100);
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
 
-  // === 2) Your existing Streamer.bot + UI wiring ===
+  **/ === 2) Your existing Streamer.bot + UI wiring ===
 
   const client = new StreamerbotClient({
     host: '127.0.0.1',
@@ -110,55 +110,53 @@ document.addEventListener('DOMContentLoaded', () => {
   smoothie.addTimeSeries(dummy,{ strokeStyle:'rgba(0,0,0,0)', lineWidth:0 });
   setInterval(()=> dummy.append(Date.now(),0), 1000);
 
-  // === YOUR onDraw hook ===
-  smoothie.options.onDraw = chart => {
-    const ctx    = chart.canvas.getContext('2d');
-    const W      = chart.canvas.width;
-    const H      = chart.canvas.height;
-    const now    = Date.now();
-    const mpp    = chart.options.millisPerPixel;
+ // 👇 this is the only onDraw hook you need, BEFORE streamTo():
+smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
+  const now = Date.now();
+  const mpp = options.millisPerPixel;
+  console.log("🟢 onDraw triggered", now, "w:", W, "h:", H, "mpp:", mpp);
 
-    eventsBuffer.forEach(ev => {
-      const t = new Date(ev.time).getTime();
-      const x = W - (now - t)/mpp;
-      if (x<0||x>W) return;
+  const ctx = chart.canvas.getContext('2d');
 
-      // pick a color
-      let color = '#5daaff';
-      switch(ev.type){
-        case 'tts':      color='#ffef61'; break;
-        case 'chat':     color='#39c3ff'; break;
-        case 'Follow':   color='#a7ff8e'; break;
-        case 'Sub':
-        case 'GiftSub':
-        case 'GiftBomb': color='#ff41b0'; break;
-        case 'ReSub':    color='#28e7d7'; break;
-        case 'Cheer':    color='#ffd256'; break;
-      }
+  eventsBuffer.forEach(ev => {
+    const t = new Date(ev.time).getTime();
+    const x = W - (now - t)/mpp;
+    if (x < 0 || x > W) return;
 
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = ev.type==='chat'?2:3;
-      // vertical line
-      ctx.beginPath();
-      ctx.moveTo(x,5);
-      ctx.lineTo(x,H-5);
-      ctx.stroke();
+    let color = "#5daaff";
+    switch (ev.type) {
+      case "tts":      color = "#ffef61"; break;
+      case "chat":     color = "#39c3ff"; break;
+      case "Follow":   color = "#a7ff8e"; break;
+      case "Sub":
+      case "GiftSub":
+      case "GiftBomb": color = "#ff41b0"; break;
+      case "ReSub":    color = "#28e7d7"; break;
+      case "Cheer":    color = "#ffd256"; break;
+    }
 
-      // shape at bottom
-      ctx.beginPath();
-      if (ev.type==='tts')      ctx.arc(x,H-18,8,0,2*Math.PI);
-      else if (ev.type==='chat') ctx.arc(x,H-12,4,0,2*Math.PI);
-      else if (ev.type==='Follow') ctx.arc(x,H-18,6,0,2*Math.PI);
-      else                      ctx.rect(x-6,H-25,13,13);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = ev.type === "chat" ? 2 : 3;
+    ctx.beginPath();
+      ctx.moveTo(x, 5);
+      ctx.lineTo(x, H - 5);
+    ctx.stroke();
 
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.restore();
-    });
-  };
+    ctx.beginPath();
+    if (ev.type === "tts")       ctx.arc(x, H - 18, 8, 0, 2*Math.PI);
+    else if (ev.type === "chat")  ctx.arc(x, H - 12, 4, 0, 2*Math.PI);
+    else if (ev.type === "Follow")ctx.arc(x, H - 18, 6, 0, 2*Math.PI);
+    else                          ctx.rect(x - 6, H - 25, 13, 13);
 
-  smoothie.streamTo(oscillo, /*delay=*/0);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  });
+};
+
+smoothie.streamTo(oscillo, 0);
+
 
 
   // --- timeline controls ---
