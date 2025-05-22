@@ -71,14 +71,14 @@ const smoothie = new SmoothieChart({
     timestampFormatter: SmoothieChart.timeFormatter
 });
 
-
+// ✅ Le bloc onDraw doit venir AVANT streamTo
 smoothie.options.onDraw = function (chart) {
     const now = Date.now();
     const px = chart.chartWidth;
     const mp = chart.options.millisPerPixel;
     const windowMillis = px * mp;
 
-    console.log("🟢 [DRAW] now:", now, "px:", px, "mp:", mp, "duration:", windowMillis);
+    console.log("🟢 onDraw triggered", now, "px:", px, "mp:", mp, "duration:", windowMillis);
 
     eventsBuffer.forEach(ev => {
         const t = new Date(ev.time).getTime();
@@ -92,7 +92,9 @@ smoothie.options.onDraw = function (chart) {
             case "tts": color = "#ffef61"; break;
             case "chat": color = "#39c3ff"; break;
             case "Follow": color = "#a7ff8e"; break;
-            case "Sub": case "GiftSub": case "GiftBomb": color = "#ff41b0"; break;
+            case "Sub":
+            case "GiftSub":
+            case "GiftBomb": color = "#ff41b0"; break;
             case "ReSub": color = "#28e7d7"; break;
             case "Cheer": color = "#ffd256"; break;
         }
@@ -117,7 +119,9 @@ smoothie.options.onDraw = function (chart) {
         ctx.restore();
     });
 };
+
 smoothie.streamTo(oscillo, 0);
+
 // --- Timeline Mode ---
 function setTimelineWindow(mode, seconds = 60) {
     timelineMode = mode;
@@ -159,7 +163,6 @@ function renderChat() {
         return `<div class="chat-msg"><span class="chat-usr">${msg.user}</span> : ${msg.message}${msg.eligible ? "" : " <span style='opacity:0.5'>(non éligible)</span>"}</div>`;
     }).join('');
 
-    // Auto-scroll si on est déjà en bas
     if (isAtBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
@@ -200,7 +203,6 @@ document.getElementById('save-session').addEventListener('click', () => {
     a.click();
     URL.revokeObjectURL(url);
 });
-
 document.getElementById('load-session').addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
