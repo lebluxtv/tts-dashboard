@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
   const now = Date.now();
   const mpp = options.millisPerPixel;
-  console.log("🟢 onDraw triggered", now, "w:", W, "h:", H, "mpp:", mpp);
+  //console.log("🟢 onDraw triggered", now, "w:", W, "h:", H, "mpp:", mpp);
 
   const ctx = chart.canvas.getContext('2d');
 
