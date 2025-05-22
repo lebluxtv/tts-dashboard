@@ -273,47 +273,54 @@ body {
     display: block;
 }
 /*___________________________________CHAT_______________________________ */
-/* recrée .chat-section pour en faire un flex-container de 50 % de la hauteur */
+/* == 1) Le conteneur reste à 50% hauteur, scroll interne == */
 .chat-section {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 50%;     /* occupe 50 % de la hauteur de .dashboard-main */
-    min-height: 0;      /* permet à flex de réduire cette zone en cas de resize */
-    background: var(--panel);
-    border-radius: 0 0 16px 16px;
-    margin-top: 0;
-    padding: 0 18px 16px 18px;
-    overflow: hidden;   /* masque tout ce qui dépasse */
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
 }
-
-/* ajuste #chat-log pour qu’il prenne tout l’espace restant dans .chat-section */
 #chat-log {
-    flex: 1 1 auto;     /* prend l’espace dispo dans .chat-section */
-    min-height: 0;      /* impératif pour que flexbox gère correctement les hauteurs */
-    overflow-y: auto;   /* scroll interne pour les messages */
-    padding: 12px 15px 10px 10px;
-    background: var(--chatbg);
-    border-radius: 10px;
-    box-shadow: 0 0 10px #0003;
-    font-size: 1.13rem;
-    line-height: 1.0em;
-    white-space: pre-wrap;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;             /* un peu de padding autour */
+  background: var(--chatbg);
+  font-size: 1rem;
+  line-height: 1.3;         /* hauteur de ligne normale */
 }
 
-/* exemples de styles serrés pour tes messages */
+/* == 2) Chaque bloc pseudo+texte == */
 .chat-msg {
-    margin: 2px 0;
-    padding: 0;
+  display: block;           /* bloc vertical */
+  margin: 0 0 4px 0;        /* 4px d’espace entre chaque bloc */
+  padding: 0;               /* plus de padding interne */
 }
-.chat-msg .chat-usr { color: var(--highlight); }
+
+/* pseudo en haut, pas d’espace en dessous */
+.chat-msg .chat-usr {
+  display: block;
+  margin: 0;                /* zero margin top/bottom */
+  padding: 0;
+  color: var(--highlight);
+  font-weight: bold;
+}
+
+/* message juste en dessous, pas d’espace au-dessus */
+.chat-msg .chat-text {
+  display: block;
+  margin: 0;                /* zero margin top/bottom */
+  padding: 0;
+  color: var(--text);
+}
+
+/* == 3) TTS garde un petit style si tu veux vraiment qu’il ressorte == */
 .chat-msg.chat-tts {
-    background: #182431;
-    border-left: 4px solid var(--accent);
-    padding-left: 8px;
-    border-radius: 3px;
-    color: #ffe791;
-    margin: 4px 0;
+  background: #182431;
+  border-left: 4px solid var(--accent);
+  padding: 4px 8px;
+  border-radius: 3px;
+  margin: 0 0 6px 0;        /* un chouia plus d’espace après */
 }
+
 
 
 @media (max-width: 900px) {
