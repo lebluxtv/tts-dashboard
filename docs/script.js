@@ -1,39 +1,7 @@
 // script.js
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* === 1) Monkey-patch SmoothieChart to expose an onDraw(chart) hook ===
-  (function patchSmoothieOnDraw() {
-    if (typeof SmoothieChart === 'undefined' || !SmoothieChart.prototype.render) {
-      return setTimeout(patchSmoothieOnDraw, 100);
-    }
-
-    const origStart = SmoothieChart.prototype.start;
-    SmoothieChart.prototype.start = function() {
-      const self = this;
-      const oldRender = self.render.bind(self);
-      self.render = function(canvas, time) {
-        oldRender(canvas, time);
-        if (typeof self.options.onDraw === 'function') {
-          self.options.onDraw(self);
-        }
-      };
-      origStart.call(self);
-    };
-
-    // If chart is already running, re-patch its render immediately
-    const origRender = SmoothieChart.prototype.render;
-    SmoothieChart.prototype.render = function(canvas, time) {
-      origRender.call(this, canvas, time);
-      if (typeof this.options.onDraw === 'function') {
-        this.options.onDraw(this);
-      }
-    };
-
-    console.log('✅ SmoothieChart patched for onDraw(chart)');
-  })();
-
-
-  **/ === 2) Your existing Streamer.bot + UI wiring ===
+// === 2) Your existing Streamer.bot + UI wiring ===
 
   const client = new StreamerbotClient({
     host: '127.0.0.1',
