@@ -89,8 +89,8 @@ else if (event.source === 'General') {
       else return;
     }
     else return;
-
-    handleCustomEvent({ type, time: now, ...data });
+/* On spread data AVANT `time`, sinon `data.time` (string ISO) écrase notre timestamp numérique */
+    handleCustomEvent({ type, ...data, time: now });
   });
 
   // === labelConfig: per-type label positions & styles ===
@@ -165,7 +165,7 @@ smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, optio
 
     const { color, width } = getStyleFor(ev.type);
 
-    /* After Debug Zone Start
+    
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth   = width;
@@ -186,20 +186,9 @@ smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, optio
     drawLabel(ev, ctx, rawX, idx);
 
     ctx.restore();
-    After Debug Zone End */
 
-    // ↓-↓-↓ Debug Start ↓-↓-↓
-    if (ev.type === 'chat') {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,0,0,0.8)';
-      ctx.lineWidth   = 3;
-      ctx.beginPath();
-      ctx.moveTo(rawX, 5);
-      ctx.lineTo(rawX, H - 5);
-      ctx.stroke();
-      ctx.restore();
-    }
-    // ↑-↑-↑ Debug End ↑-↑-↑
+
+
   });  // ← fin du forEach
 
 };  // ← fin de la fonction onDraw
