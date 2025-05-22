@@ -159,9 +159,18 @@ smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, optio
   eventsBuffer.forEach(ev => {
     const rawX    = W - (now - ev.time) / mpp;
     if (rawX < 0 || rawX > W) return;
-    const bucketX = Math.round(rawX / tolPx) * tolPx;
-    const idx     = overlaps[bucketX] || 0;
+    // === collision offset **sans** compter les chat ===
+  let bucketX, idx;
+  if (ev.type === 'chat') {
+    // pour les chats : pas d'offset, on garde rawX et idx = 0
+    bucketX = rawX;
+    idx     = 0;
+  } else {
+    // pour tous les autres events, on gère les collisions
+    bucketX = Math.round(rawX / tolPx) * tolPx;
+    idx     = overlaps[bucketX] || 0;
     overlaps[bucketX] = idx + 1;
+  }
 
     const { color, width } = getStyleFor(ev.type);
 
