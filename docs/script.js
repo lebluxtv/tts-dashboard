@@ -390,7 +390,7 @@ function getStyleFor(type) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(`${ev.message.bits} bits`, x, baseY + lineHeight);
       ctx.fillText(ev.message.displayName, x, baseY + lineHeight * 2);
-
+    }
 // Default : 1 ligne (type)    
     else {
       ctx.fillText(ev.type, x, baseY);
