@@ -150,60 +150,62 @@ else if (event.source === 'General') {
 
 // === 6) onDraw hook: draw bars, icons & labels ===
 smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
-  const now   = Date.now();
-  const mpp   = options.millisPerPixel;
-  const ctx   = chart.canvas.getContext('2d');
-  const tolPx = 5;
+  const now    = Date.now();
+  const mpp    = options.millisPerPixel;
+  const ctx    = chart.canvas.getContext('2d');
+  const tolPx  = 5;
   const overlaps = {};
 
   eventsBuffer.forEach(ev => {
-  const rawX    = W - (now - ev.time) / mpp;
-  if (rawX < 0 || rawX > W) return;
-  const bucketX = Math.round(rawX / tolPx) * tolPx;
-  const idx     = overlaps[bucketX] || 0;
-  overlaps[bucketX] = idx + 1;
+    const rawX    = W - (now - ev.time) / mpp;
+    if (rawX < 0 || rawX > W) return;
+    const bucketX = Math.round(rawX / tolPx) * tolPx;
+    const idx     = overlaps[bucketX] || 0;
+    overlaps[bucketX] = idx + 1;
 
-  const { color, width } = getStyleFor(ev.type);
+    const { color, width } = getStyleFor(ev.type);
 
-  /* After Debug Zone Start
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth   = width;
-
-  // — draw vertical bar at rawX
-  ctx.beginPath();
-  ctx.moveTo(rawX, 5);
-  ctx.lineTo(rawX, H - 5);
-  ctx.stroke();
-
-  // — draw icon at rawX
-  ctx.beginPath();
-  drawIcon(ev.type, ctx, rawX, H);
-  ctx.fillStyle = color;
-  ctx.fill();
-
-  // — draw label at rawX, offset by idx
-  drawLabel(ev, ctx, rawX, idx);
-
-  ctx.restore();
-  After Debug Zone End */
-
-  // ↓-↓-↓ Debug Start ↓-↓-↓
-  // debug: highlight chat bars in red
-  if (ev.type === 'chat') {
+    /* After Debug Zone Start
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,0,0,0.8)';
-    ctx.lineWidth   = 3;
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = width;
+
+    // — draw vertical bar at rawX
     ctx.beginPath();
     ctx.moveTo(rawX, 5);
     ctx.lineTo(rawX, H - 5);
     ctx.stroke();
-    ctx.restore();
-  }
-  // ↑-↑-↑ Debug End ↑-↑-↑
-});
 
-  smoothie.streamTo(oscillo, 0);
+    // — draw icon at rawX
+    ctx.beginPath();
+    drawIcon(ev.type, ctx, rawX, H);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // — draw label at rawX, offset by idx
+    drawLabel(ev, ctx, rawX, idx);
+
+    ctx.restore();
+    After Debug Zone End */
+
+    // ↓-↓-↓ Debug Start ↓-↓-↓
+    if (ev.type === 'chat') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,0,0,0.8)';
+      ctx.lineWidth   = 3;
+      ctx.beginPath();
+      ctx.moveTo(rawX, 5);
+      ctx.lineTo(rawX, H - 5);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // ↑-↑-↑ Debug End ↑-↑-↑
+  });  // ← fin du forEach
+
+};  // ← fin de la fonction onDraw
+
+smoothie.streamTo(oscillo, 0);
+
 
   // === 7) Timeline controls & adapt ===
   function setTimelineWindow(mode, secs = 60) {
