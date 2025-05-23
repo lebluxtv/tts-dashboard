@@ -177,57 +177,56 @@ else if (event.source === 'General') {
 
 // === 6) onDraw hook: draw bars, icons & labels ===
 smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
-  const now    = Date.now();
-  const mpp    = options.millisPerPixel;
-  const ctx    = chart.canvas.getContext('2d');
-  const tolPx  = 5;
+  const now      = Date.now();
+  const mpp      = options.millisPerPixel;
+  const ctx      = chart.canvas.getContext('2d');
+  const tolPx    = 5;
   const overlaps = {};
 
   eventsBuffer.forEach(ev => {
-    const rawX    = W - (now - ev.time) / mpp;
+    // 1) Filtrer les événements totalement masqués
+    if (!filterConfig[ev.type]?.visible) return;
+
+    const rawX = W - (now - ev.time) / mpp;
     if (rawX < 0 || rawX > W) return;
-    // === collision offset **sans** compter les chat ===
-  let bucketX, idx;
-  if (ev.type === 'chat') {
-    // pour les chats : pas d'offset, on garde rawX et idx = 0
-    bucketX = rawX;
-    idx     = 0;
-  } else {
-    // pour tous les autres events, on gère les collisions
-    bucketX = Math.round(rawX / tolPx) * tolPx;
-    idx     = overlaps[bucketX] || 0;
-    overlaps[bucketX] = idx + 1;
-  }
+
+    // 2) Gestion des collisions (sans compter les chats si tu veux)
+    let bucketX, idx;
+    if (ev.type === 'chat') {
+      bucketX = rawX;
+      idx     = 0;
+    } else {
+      bucketX = Math.round(rawX / tolPx) * tolPx;
+      idx     = overlaps[bucketX] || 0;
+      overlaps[bucketX] = idx + 1;
+    }
 
     const { color, width } = getStyleFor(ev.type);
 
-    
+    // 3) Trace la barre verticale
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth   = width;
-
-    // — draw vertical bar at rawX
     ctx.beginPath();
     ctx.moveTo(rawX, 5);
     ctx.lineTo(rawX, H - 5);
     ctx.stroke();
 
-    // — draw icon at rawX
+    // 4) Trace l’icône
     ctx.beginPath();
     drawIcon(ev.type, ctx, rawX, H);
     ctx.fillStyle = color;
     ctx.fill();
 
-    // — draw label at rawX, offset by idx
-    drawLabel(ev, ctx, rawX, idx);
+    // 5) Trace le label **uniquement si activé**
+    if (filterConfig[ev.type].labels) {
+      drawLabel(ev, ctx, rawX, idx);
+    }
 
     ctx.restore();
+  });
+};
 
-
-
-  });  // ← fin du forEach
-
-};  // ← fin de la fonction onDraw
 
 smoothie.streamTo(oscillo, 0);
 
