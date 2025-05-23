@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastTtsTime, ttsProgressInterval, ttsTimeout;
   let timelineMode     = 'scale';
   let lastScaleSeconds = 60;
+// === 1-bis) Configuration des filtres d'événements ===
+const filterConfig = {};
+// initialise tous les types à visible=true
+Object.keys(labelConfig).forEach(type => { filterConfig[type] = { visible: true, labels: true }; });
+
+// injection des boutons de filtre
+const filtersDiv = document.getElementById('event-filters');
+Object.entries(labelConfig).forEach(([type, cfg]) => {
+  if (type === 'default') return;
+  const btn = document.createElement('button');
+  btn.textContent = type;
+  btn.style.color = cfg.color;
+  btn.classList.add('active');
+  btn.onclick = () => {
+    // toggle visibilité
+    filterConfig[type].visible = !filterConfig[type].visible;
+    btn.classList.toggle('active', filterConfig[type].visible);
+  };
+  btn.oncontextmenu = e => {
+    e.preventDefault();
+    // toggle affichage du label
+    filterConfig[type].labels = !filterConfig[type].labels;
+    btn.style.opacity = filterConfig[type].labels ? (filterConfig[type].visible ? '1' : '0.7') : '0.3';
+  };
+  btn.title = "clic gauche : afficher/masquer la barre\nclic droit : afficher/masquer le label";
+  filtersDiv.appendChild(btn);
+});
 
   // === 2) Streamer.bot client init ===
   const client = new StreamerbotClient({
