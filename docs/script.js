@@ -1,23 +1,26 @@
 // script.js
 document.addEventListener('DOMContentLoaded', () => {
   // === 1) Références UI & variables globales ===
-  const statusDot       = document.getElementById('status-dot');
-  const viewerCountSpan = document.getElementById('viewer-count');
-  const chatDiv         = document.getElementById('chat-log');
-  const oscillo         = document.getElementById('oscilloscope');
-  const timelineBtns    = document.querySelectorAll('.timeline-controls button');
-  const ttsHeader       = document.getElementById('tts-header');
-  const ttsPanel        = document.getElementById('tts-panel');
-  const ttsProgress     = document.querySelector('#tts-progress .bar');
-  const eventFeed       = document.getElementById('event-feed');
+  const statusDot        = document.getElementById('status-dot');
+  const viewerCountSpan  = document.getElementById('viewer-count');
+  const chatDiv          = document.getElementById('chat-log');
+  const oscillo          = document.getElementById('oscilloscope');
+  const timelineBtns     = document.querySelectorAll('.timeline-controls button');
+  const ttsHeader        = document.getElementById('tts-header');
+  const ttsPanel         = document.getElementById('tts-panel');
+  const ttsProgress      = document.querySelector('#tts-progress .bar');
+  const eventFeed        = document.getElementById('event-feed');
+  // Nouveaux spans pour msgs/min et users/min
+  const msgsPerMinSpan   = document.getElementById('osc-msg-min');
+  const usersPerMinSpan  = document.getElementById('osc-users-min');
 
-  let chatBuffer   = [];
-  let eventsBuffer = [];
-  const maxChat    = 2000;
-  const TTS_MAX    = 3 * 60 * 1000;
+  let chatBuffer    = [];
+  let eventsBuffer  = [];
+  const maxChat     = 2000;
+  const TTS_MAX     = 3 * 60 * 1000;
   let lastTtsTime, ttsProgressInterval, ttsTimeout;
-  let timelineMode     = 'scale';
-  let lastScaleSeconds = 60;
+  let timelineMode      = 'scale';
+  let lastScaleSeconds  = 60;
 
   // === 1) labelConfig: position & style des labels selon type ===
   const labelConfig = {
@@ -56,24 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const filtersDiv = document.getElementById('event-filters');
   Object.entries(labelConfig).forEach(([type,cfg]) => {
     if (type === 'default') return;
-
     const btn = document.createElement('button');
-    btn.textContent   = type;
-    btn.dataset.type  = type;        // pour un style éventuel en CSS
-// 1) on applique la couleur de fond
-  btn.style.backgroundColor = cfg.color;
-
-  // 2) on calcule la luminosité (YIQ) pour choisir noir ou blanc
-  (()=>{
-    const hex = cfg.color.replace('#','');
-    const r = parseInt(hex.substr(0,2), 16);
-    const g = parseInt(hex.substr(2,2), 16);
-    const b = parseInt(hex.substr(4,2), 16);
-    // formule YIQ
-    const yiq = (r*299 + g*587 + b*114) / 1000;
-    btn.style.color = yiq >= 128 ? '#000' : '#fff';
-  })();
-
+    btn.textContent  = type;
+    btn.dataset.type = type;
+    // couleur de fond
+    btn.style.backgroundColor = cfg.color;
+    // contraste YIQ pour le texte
+    (()=>{
+      const hex = cfg.color.replace('#','');
+      const r = parseInt(hex.substr(0,2),16),
+            g = parseInt(hex.substr(2,2),16),
+            b = parseInt(hex.substr(4,2),16);
+      const yiq = (r*299 + g*587 + b*114)/1000;
+      btn.style.color = yiq >= 128 ? '#000' : '#fff';
+    })();
     btn.classList.add('active');
     btn.onclick = () => {
       filterConfig[type].visible = !filterConfig[type].visible;
@@ -117,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   client.on('*', ({ event, data }) => {
     let type = null;
     const now = Date.now();
-
     if (event.source === 'Twitch') {
       switch(event.type) {
         case 'Whisper': type='chat'; break;
@@ -183,18 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 6) Hook onDraw: barre, icône, label selon filtres ===
   smoothie.options.onDraw = function({ chart, chartWidth:W, chartHeight:H, options }) {
-    const now = Date.now();
-    const mpp = options.millisPerPixel;
-    const ctx = chart.canvas.getContext('2d');
+    const now   = Date.now();
+    const mpp   = options.millisPerPixel;
+    const ctx   = chart.canvas.getContext('2d');
     const tolPx = 5;
     const overlaps = {};
 
     eventsBuffer.forEach(ev => {
-      if (!filterConfig[ev.type]?.visible) return;           // 1) visibilité
+      if (!filterConfig[ev.type]?.visible) return;
       const rawX = W - (now - ev.time)/mpp;
-      if (rawX < 0 || rawX > W) return;
+      if (rawX<0 || rawX>W) return;
 
-      // 2) collision offset (optionnel chat)
       let bucketX, idx;
       if (ev.type==='chat') {
         bucketX = rawX; idx = 0;
@@ -206,22 +203,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const { color, width } = getStyleFor(ev.type);
 
-      // 3) barre verticale
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth   = width;
       ctx.beginPath();
-      ctx.moveTo(rawX, 5);
-      ctx.lineTo(rawX, H-5);
+      ctx.moveTo(rawX,5);
+      ctx.lineTo(rawX,H-5);
       ctx.stroke();
 
-      // 4) icône
       ctx.beginPath();
       drawIcon(ev.type, ctx, rawX, H);
       ctx.fillStyle = color;
       ctx.fill();
 
-      // 5) label seuls si labels activés
       if (filterConfig[ev.type].labels) {
         drawLabel(ev, ctx, rawX, idx);
       }
@@ -251,10 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setTimelineWindow('scale',60);
   setInterval(adaptTimeline,1500);
-  timelineBtns.forEach(btn =>
-    btn.addEventListener('click', () => {
+  timelineBtns.forEach(btn=>
+    btn.addEventListener('click',()=>{
       const val = btn.dataset.scale;
-      setTimelineWindow(val==='adapt'?'adapt':'scale', parseInt(val,10));
+      setTimelineWindow(val==='adapt'?'adapt':'scale',parseInt(val,10));
     })
   );
 
@@ -264,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!chatBuffer.length) {
       chatDiv.innerHTML = '<div class="chat-msg empty"><span class="chat-usr">…</span><span class="chat-text">Aucun message reçu</span></div>';
     } else {
-      chatDiv.innerHTML = chatBuffer.slice(-100).map(m => {
+      chatDiv.innerHTML = chatBuffer.slice(-100).map(m=>{
         const cls = m.isTTS ? 'chat-msg chat-tts' : 'chat-msg';
         return `<div class="${cls}"><span class="chat-usr">${m.user}:</span><span class="chat-text">${m.message}</span></div>`;
       }).join('');
@@ -305,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     a.style.display='none';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
-  document.getElementById('load-session').addEventListener('change', e=>{
+  document.getElementById('load-session').addEventListener('change',e=>{
     const f = e.target.files[0]; if(!f) return;
     clearInterval(ttsProgressInterval);
     clearTimeout(ttsTimeout);
@@ -313,8 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
     r.onload = ev=>{
       try {
         const sess = JSON.parse(ev.target.result);
-        chatBuffer   = Array.isArray(sess.chat)?sess.chat:[];
-        eventsBuffer = Array.isArray(sess.events)?sess.events:[];
+        chatBuffer    = Array.isArray(sess.chat)?sess.chat:[];
+        eventsBuffer  = Array.isArray(sess.events)?sess.events:[];
         renderChat();
         if (timelineMode==='adapt') adaptTimeline();
         alert('Log chargé !');
@@ -326,53 +320,52 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // === 12) Handler custom events ===
-  function handleCustomEvent({ type, time: eventTime, ...payload }) {
+  function handleCustomEvent({ type, time:eventTime, ...payload }) {
     console.log('EV RAW →', type, payload);
     const time = eventTime || Date.now();
     if (type==='chat') {
       chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
-      if(chatBuffer.length>maxChat) chatBuffer.shift();
+      if (chatBuffer.length>maxChat) chatBuffer.shift();
       eventsBuffer.push({ type,time,...payload });
-      if(eventsBuffer.length>1000) eventsBuffer.shift();
+      if (eventsBuffer.length>1000) eventsBuffer.shift();
       renderChat();
       return;
     }
-if (type === 'tts') {
-   // on prend user OU selectedUser pour le widget tts-reader-selection
-   const ttsUser = payload.user ?? payload.selectedUser;
-   setTtsHeader(ttsUser, payload.message);
-    ttsPanel.classList.add('twitch-tts-glow');
-    setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
-   chatBuffer.push({ time, user:ttsUser, message:payload.message, eligible:true, isTTS:true });
-    if (chatBuffer.length>maxChat) chatBuffer.shift();
-    renderChat();
-    eventsBuffer.push({ type, time, ...payload });
-    if (eventsBuffer.length>1000) eventsBuffer.shift();
-    return;
-  }
+    if (type==='tts') {
+      const ttsUser = payload.user ?? payload.selectedUser;
+      setTtsHeader(ttsUser,payload.message);
+      ttsPanel.classList.add('twitch-tts-glow');
+      setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
+      chatBuffer.push({ time,user:ttsUser,message:payload.message,eligible:true,isTTS:true });
+      if (chatBuffer.length>maxChat) chatBuffer.shift();
+      renderChat();
+      eventsBuffer.push({ type,time,...payload });
+      if (eventsBuffer.length>1000) eventsBuffer.shift();
+      return;
+    }
     if (type==='tick') {
       eventsBuffer.push({ type,time,...payload });
-      if(eventsBuffer.length>1000) eventsBuffer.shift();
+      if (eventsBuffer.length>1000) eventsBuffer.shift();
       return;
     }
     eventsBuffer.push({ type,time,...payload });
-    if(eventsBuffer.length>1000) eventsBuffer.shift();
+    if (eventsBuffer.length>1000) eventsBuffer.shift();
   }
 
   // === 13) Helpers: styles, icônes, labels ===
   function getStyleFor(type) {
     let color='#888888', width=2;
     switch(type) {
-      case 'tts': color='#ffef61'; break;
-      case 'chat': color='rgba(57,195,255,0.4)'; width=1; break;
-      case 'Cheer':            color='#ffd256'; break;
-      case 'Follow':           color='#a7ff8e'; break;
-      case 'Raid':             color='#ffae42'; break;
-      case 'AdRun':            color='#ffaa00'; break;
-      case 'Sub':              color='#ff41b0'; break;
-      case 'ReSub':            color='#28e7d7'; break;
-      case 'GiftSub':          color='#ff71ce'; break;
-      case 'GiftBomb':         color='#ff1f8b'; break;
+      case 'tts':      color='#ffef61'; break;
+      case 'chat':     color='rgba(57,195,255,0.4)'; width=1; break;
+      case 'Cheer':    color='#ffd256'; break;
+      case 'Follow':   color='#a7ff8e'; break;
+      case 'Raid':     color='#ffae42'; break;
+      case 'AdRun':    color='#ffaa00'; break;
+      case 'Sub':      color='#ff41b0'; break;
+      case 'ReSub':    color='#28e7d7'; break;
+      case 'GiftSub':  color='#ff71ce'; break;
+      case 'GiftBomb': color='#ff1f8b'; break;
       case 'HypeTrainStart':   color='#ff6b6b'; break;
       case 'HypeTrainUpdate':  color='#ff5252'; break;
       case 'HypeTrainLevelUp': color='#ff3b3b'; break;
@@ -392,17 +385,17 @@ if (type === 'tts') {
   }
 
   function drawIcon(type, ctx, x, H) {
-    if      (type==='tts')     ctx.arc(x, H-18,  8, 0,2*Math.PI);
-    else if (type==='chat')    ctx.arc(x, H-12, 4,0,2*Math.PI);
-    else if (type==='Follow')  ctx.arc(x, H-18,6,0,2*Math.PI);
-    else                       ctx.rect(x-6, H-25,13,13);
+    if      (type==='tts')     ctx.arc(x,H-18,  8,0,2*Math.PI);
+    else if (type==='chat')    ctx.arc(x,H-12,  4,0,2*Math.PI);
+    else if (type==='Follow')  ctx.arc(x,H-18,  6,0,2*Math.PI);
+    else                       ctx.rect(x-6,H-25,13,13);
   }
 
   function drawLabel(ev, ctx, x, idx) {
-    const cfg = labelConfig[ev.type] || labelConfig.default;
+    const cfg = labelConfig[ev.type]||labelConfig.default;
     const lineHeight = parseInt(cfg.font,10)+2;
     const baseY = cfg.y + idx*lineHeight*2;
-    ctx.font = cfg.font;
+    ctx.font      = cfg.font;
     ctx.textAlign = 'center';
     ctx.fillStyle = cfg.color;
 
@@ -424,10 +417,11 @@ if (type === 'tts') {
     }
   }
 
-  // === Final init calls ===
+  // === Final init calls & métriques live ===
   renderChat();
   resizeOscillo();
   setInterval(async ()=>{
+    // — viewers live & title
     try {
       const r = await client.getActiveViewers();
       const n = r.viewers.length;
@@ -437,6 +431,11 @@ if (type === 'tts') {
       viewerCountSpan.textContent = '';
       viewerCountSpan.title = '';
     }
-  },10000);
-
+    // — msgs/s (SmoothieChart met déjà à jour .osc-msg et .osc-users automatiquement)
+    // — msgs/min & users/min
+    const oneMinAgo = Date.now() - 60_000;
+    const recent    = chatBuffer.filter(m => m.time >= oneMinAgo);
+    msgsPerMinSpan.textContent  = recent.length;
+    usersPerMinSpan.textContent = new Set(recent.map(m => m.user)).size;
+  }, 10000);
 });
