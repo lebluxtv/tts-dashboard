@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // === Récupération dynamique de l'ID de l'action TTS Timer Set ===
       try {
         const actionsObj = await client.getActions();
-        // actionsObj.actions (et non juste actionsObj !)
         const ttsTimer = actionsObj.actions.find(a => a.name === "TTS Timer Set");
         if (ttsTimer) {
           TTS_TIMER_ACTION_ID = ttsTimer.id;
@@ -143,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Knob jQuery (si chargé)
-  if (window.$ && $(ttsTimerInput).data('knob') === undefined) {
+  if (window.$ && typeof $.fn.knob === "function" && ttsTimerInput) {
     $(ttsTimerInput).knob({
       min: 1,
       max: 10,
@@ -241,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
       fontSize: 14,
       precision: 0
     },
-    // Affichage logique des repères selon le scale
     timestampFormatter: date => {
       const s  = date.getSeconds();
       if (timelineMode === 'scale') {
@@ -465,15 +463,15 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'Cheer': color='#ffd256'; break;
       case 'Follow': color='#a7ff8e'; break;
       case 'Raid': color='#ffae42'; break;
-      case 'AdRun': color='#ffaa00'; break;
-      case 'Sub': color='#ff41b0'; break;
-      case 'ReSub': color='#28e7d7'; break;
-      case 'GiftSub': color='#ff71ce'; break;
-      case 'GiftBomb': color='#ff1f8b'; break;
-      case 'HypeTrainStart': color='#ff6b6b'; break;
-      case 'HypeTrainUpdate':color='#ff5252'; break;
-      case 'HypeTrainLevelUp':color='#ff3b3b'; break;
-      case 'HypeTrainEnd': color='#ff2424'; break;
+      case 'AdRun': color:'#ffaa00'; break;
+      case 'Sub': color:'#ff41b0'; break;
+      case 'ReSub': color:'#28e7d7'; break;
+      case 'GiftSub': color:'#ff71ce'; break;
+      case 'GiftBomb': color:'#ff1f8b'; break;
+      case 'HypeTrainStart': color:'#ff6b6b'; break;
+      case 'HypeTrainUpdate':color:'#ff5252'; break;
+      case 'HypeTrainLevelUp':color:'#ff3b3b'; break;
+      case 'HypeTrainEnd': color:'#ff2424'; break;
       case 'RewardRedemption':color:'#8e44ad'; break;
       case 'RewardCreated': color:'#9b59b6'; break;
       case 'RewardUpdated': color:'#71368a'; break;
