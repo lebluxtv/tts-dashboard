@@ -75,6 +75,69 @@ body {
 .header-bar > * { vertical-align: middle; }
 
 /* ================================
+   TIMER CONTROL (Knob/Slider)
+   ================================ */
+.timer-control {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 7px;
+}
+#tts-timer {
+    width: 52px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: 1.3px solid var(--accent);
+    background: #232a2c;
+    color: var(--accent);
+    text-align: center;
+    margin-right: 3px;
+}
+#tts-timer-label {
+    color: var(--accent);
+    font-size: 1.08rem;
+    min-width: 35px;
+}
+
+/* ================================
+   TIMELINE CONTROLS (Boutons 1 min, 5 min, etc.)
+   ================================ */
+.timeline-controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0 8px 14px;
+    align-items: center;
+}
+.timeline-controls button {
+    background: var(--panel);
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 5px 17px;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: .2px;
+    box-shadow: 0 1px 5px #0003;
+    cursor: pointer;
+    opacity: 0.86;
+    transition: all .15s;
+    outline: none;
+}
+.timeline-controls button.active,
+.timeline-controls button:active {
+    background: var(--accent);
+    color: #181a17;
+    opacity: 1;
+    transform: scale(1.09);
+    border-color: #ffd700;
+}
+.timeline-controls button:hover:not(.active) {
+    background: #343632;
+    color: #fffbe0;
+    opacity: 1;
+}
+
+/* ================================
    FILTRES D’ÉVÉNEMENTS (PILLS)
    ================================ */
 .event-filters {
@@ -261,36 +324,37 @@ body {
 .event-feed.show { display:block; }
 
 /* ================================
-   SPLIT CHAT / TTS INFO
+   SPLIT CHAT / TTS INFO (correction alignement & taille)
    ================================ */
 .chat-tts-section {
-    flex: 1 1 0%;
     display: flex;
-    gap: 12px;
+    flex-direction: row;
+    gap: 18px;
     margin: 0 14px 14px 14px;
-    min-height: 0;
-    height: 100%;
+    min-height: 200px;
+    height: 380px;
+    max-height: 42vh;
 }
 .chat-container,
 .tts-info-container {
-    flex: 1 1 0%;
-    display: flex;
-    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 0;
-    height: 100%;
+    max-height: 100%;
+    background: var(--chatbg);
     border-radius: 10px;
     box-shadow: 0 0 10px #0003;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
-.chat-container { background: var(--chatbg); }
 .tts-info-container {
     background: var(--panel);
+    padding: 14px 18px 12px 18px;
     box-shadow: 0 2px 12px #0007;
     color: var(--text);
-    padding: 12px 16px;
     overflow-y: auto;
 }
-
 #chat-log {
     flex: 1 1 auto;
     overflow-y: auto;
@@ -299,7 +363,6 @@ body {
     max-height: 100%;
     box-sizing: border-box;
 }
-
 .tts-info-container h2 {
     margin: 0 0 8px;
     color: var(--accent);
@@ -339,6 +402,14 @@ body {
     .header-bar h1 { font-size:1.2rem; }
     .chat-tts-section {
         flex-direction: column;
-        margin: 12px 7px 7px;
+        height: auto;
+        max-height: none;
+        margin: 12px 7px 7px 7px;
+    }
+    .chat-container,
+    .tts-info-container {
+        min-height: 120px;
+        height: 220px;
+        max-height: 100%;
     }
 }
