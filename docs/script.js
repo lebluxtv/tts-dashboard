@@ -176,11 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fontSize: 14,
       precision: 0
     },
-    timestampFormatter: date => {
-      // n'affiche que les graduations 0s,5s,10s,... avec un "+5s"
-      const s = date.getSeconds();
-      return (s % 5 === 0) ? `+${s}s` : '';
-    }
+    timestampFormatter: () => '+5s'
   });
   const dummy = new TimeSeries();
   smoothie.addTimeSeries(dummy, { strokeStyle:'rgba(0,0,0,0)', lineWidth:0 });
