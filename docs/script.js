@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const { color, width } = getStyleFor(ev.type);
 
+      // barre
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth   = width;
@@ -211,11 +212,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.lineTo(rawX,H-5);
       ctx.stroke();
 
+      // icône
       ctx.beginPath();
       drawIcon(ev.type, ctx, rawX, H);
       ctx.fillStyle = color;
       ctx.fill();
 
+      // label
       if (filterConfig[ev.type].labels) {
         drawLabel(ev, ctx, rawX, idx);
       }
@@ -247,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
   timelineBtns.forEach(btn=>
     btn.addEventListener('click',()=>{
       const val = btn.dataset.scale;
-      setTimelineWindow(val==='adapt'?'adapt':'scale',parseInt(val,10));
+      setTimelineWindow(val==='adapt'?'adapt':'scale', parseInt(val,10));
     })
   );
 
@@ -351,12 +354,77 @@ document.addEventListener('DOMContentLoaded', () => {
     if (eventsBuffer.length>1000) eventsBuffer.shift();
   }
 
+  // === 13) Helpers: styles, icônes, labels ===
+  function getStyleFor(type) {
+    let color='#888888', width=2;
+    switch(type) {
+      case 'tts':      color='#ffef61'; break;
+      case 'chat':     color='rgba(57,195,255,0.4)'; width=1; break;
+      case 'Cheer':    color='#ffd256'; break;
+      case 'Follow':   color='#a7ff8e'; break;
+      case 'Raid':     color='#ffae42'; break;
+      case 'AdRun':    color='#ffaa00'; break;
+      case 'Sub':      color='#ff41b0'; break;
+      case 'ReSub':    color='#28e7d7'; break;
+      case 'GiftSub':  color='#ff71ce'; break;
+      case 'GiftBomb': color='#ff1f8b'; break;
+      case 'HypeTrainStart':   color='#ff6b6b'; break;
+      case 'HypeTrainUpdate':  color='#ff5252'; break;
+      case 'HypeTrainLevelUp': color='#ff3b3b'; break;
+      case 'HypeTrainEnd':     color='#ff2424'; break;
+      case 'RewardRedemption': color='#8e44ad'; break;
+      case 'RewardCreated':    color='#9b59b6'; break;
+      case 'RewardUpdated':    color='#71368a'; break;
+      case 'RewardDeleted':    color='#5e3370'; break;
+      case 'CommunityGoalContribution': color='#2ecc71'; break;
+      case 'CommunityGoalEnded':        color='#27ae60'; break;
+      case 'PollCreated':      color='#3498db'; break;
+      case 'PollUpdated':      color='#2980b9'; break;
+      case 'PollEnded':        color='#1f618d'; break;
+      case 'TimedAction':      color='#95a5a6'; break;
+    }
+    return { color, width };
+  }
+
+  function drawIcon(type, ctx, x, H) {
+    if      (type==='tts')     ctx.arc(x, H-18,  8, 0, 2*Math.PI);
+    else if (type==='chat')    ctx.arc(x, H-12,  4, 0, 2*Math.PI);
+    else if (type==='Follow')  ctx.arc(x, H-18,  6, 0, 2*Math.PI);
+    else                       ctx.rect(x-6, H-25, 13, 13);
+  }
+
+  function drawLabel(ev, ctx, x, idx) {
+    const cfg = labelConfig[ev.type] || labelConfig.default;
+    const lineHeight = parseInt(cfg.font,10) + 2;
+    const baseY      = cfg.y + idx * lineHeight * 2;
+    ctx.font      = cfg.font;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = cfg.color;
+
+    if (ev.type==='TimedAction' && ev.name) {
+      ctx.fillText(ev.type, x, baseY);
+      ctx.fillText(ev.name, x, baseY + lineHeight);
+    }
+    else if (ev.type==='Follow' && ev.displayName) {
+      ctx.fillText(ev.type, x, baseY);
+      ctx.fillText(ev.displayName, x, baseY + lineHeight);
+    }
+    else if (ev.type==='Cheer' && ev.message && ev.message.hasBits) {
+      ctx.fillText(ev.type, x, baseY);
+      ctx.fillText(`${ev.message.bits} bits`, x, baseY + lineHeight);
+      ctx.fillText(ev.message.displayName, x, baseY + lineHeight * 2);
+    }
+    else {
+      ctx.fillText(ev.type, x, baseY);
+    }
+  }
+
   // === Final init calls & métriques live ===
   renderChat();
   resizeOscillo();
 
   // — viewers live & msgs/min & users/min toutes les 10s
-  setInterval(async ()=>{
+  setInterval(async () => {
     try {
       const r = await client.getActiveViewers();
       const n = r.viewers.length;
@@ -373,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 10_000);
 
   // — msgs/s & users/s toutes les 1s
-  setInterval(()=>{
+  setInterval(() => {
     const oneSecAgo = Date.now() - 1_000;
     const lastSec   = chatBuffer.filter(m => m.time >= oneSecAgo);
     document.querySelector('.osc-msg').textContent   = lastSec.length;
-    document.querySelector('.osc-users').textContent = new Set(lastSec.map(m=>m.user)).size;
+    document.querySelector('.osc-users').textContent = new Set(lastSec.map(m => m.user)).size;
   }, 1_000);
 
 });
