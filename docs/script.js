@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Nouveaux spans pour msgs/min et users/min
   const msgsPerMinSpan   = document.getElementById('osc-msg-min');
   const usersPerMinSpan  = document.getElementById('osc-users-min');
+  // Nouvelle div pour infos TTS détaillées
+  const ttsInfoDiv       = document.getElementById('tts-info');
 
   let chatBuffer    = [];
   let eventsBuffer  = [];
@@ -325,6 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleCustomEvent({ type, time:eventTime, ...payload }) {
     console.log('EV RAW →', type, payload);
     const time = eventTime || Date.now();
+
+    // Chat → buffer + affichage
     if (type==='chat') {
       chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
@@ -333,23 +337,56 @@ document.addEventListener('DOMContentLoaded', () => {
       renderChat();
       return;
     }
+
+    // TTS selection → header, chat, info-panel
     if (type==='tts') {
       const ttsUser = payload.user ?? payload.selectedUser;
       setTtsHeader(ttsUser, payload.message);
       ttsPanel.classList.add('twitch-tts-glow');
       setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
+
+      // mise à jour du chat
       chatBuffer.push({ time, user:ttsUser, message:payload.message, eligible:true, isTTS:true });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
       renderChat();
+
+      // stocker dans events et limiter taille
       eventsBuffer.push({ type,time,...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
+
+      // --- NOUVELLE PARTIE : remplir le panneau Détails TTS ---
+      ttsInfoDiv.innerHTML = '';  // on efface
+      if (Array.isArray(payload.candidatesPanel)) {
+        // trouver la ligne correspondant à l'utilisateur sélectionné
+        const entry = payload.candidatesPanel.find(e => e.user === ttsUser);
+        if (entry) {
+          const ul = document.createElement('ul');
+          ul.innerHTML = `
+            <li><strong>Utilisateur :</strong> ${ttsUser}</li>
+            <li><strong>Messages :</strong> ${entry.messages}</li>
+            <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
+            <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
+            <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
+            <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
+          `;
+          ttsInfoDiv.appendChild(ul);
+        }
+      } else {
+        // cas fallback
+        ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
+      }
+
       return;
     }
+
+    // Tick ou autres events → on stocke pour le timeline
     if (type==='tick') {
       eventsBuffer.push({ type,time,...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
       return;
     }
+
+    // tout autre event → on stocke
     eventsBuffer.push({ type,time,...payload });
     if (eventsBuffer.length>1000) eventsBuffer.shift();
   }
