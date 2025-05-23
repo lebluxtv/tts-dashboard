@@ -200,13 +200,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = Date.now();
     const mpp = options.millisPerPixel;
     const ctx = chart.canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+ctx.translate(0.5, 0.5); // aligne les pixels
     const tol = 5;
     const overlaps = {};
 
     eventsBuffer.forEach(ev => {
       if (!filterConfig[ev.type]?.visible) return;
-      const xRounded = Math.round((now - ev.time) / mpp / 2) * 2; // résolution de 2px bucket
-      let rawX = W - xRounded;
+//let rawX = Math.round(W - (now - ev.time)/mpp);
+if (!ev.xFixed) return; // sécurité si ancien format
+let rawX = Math.round(W - (now - ev.xFixed) / mpp);
       if (rawX < 0 || rawX > W) return;
 
       let bucketX = rawX, idx = 0;
@@ -341,7 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type==='chat'){
       chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
-      eventsBuffer.push({ type,time,...payload });
+     // eventsBuffer.push({ type,time,...payload });
+const xFixed = Date.now(); // ← on fige le moment d’affichage
+eventsBuffer.push({ type, time, xFixed, ...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
       renderChat();
       return;
