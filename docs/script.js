@@ -56,10 +56,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const filtersDiv = document.getElementById('event-filters');
   Object.entries(labelConfig).forEach(([type,cfg]) => {
     if (type === 'default') return;
+
     const btn = document.createElement('button');
     btn.textContent   = type;
     btn.dataset.type  = type;        // pour un style éventuel en CSS
-    btn.style.color   = cfg.color;   // fallback si pas de CSS
+// 1) on applique la couleur de fond
+  btn.style.backgroundColor = cfg.color;
+
+  // 2) on calcule la luminosité (YIQ) pour choisir noir ou blanc
+  (()=>{
+    const hex = cfg.color.replace('#','');
+    const r = parseInt(hex.substr(0,2), 16);
+    const g = parseInt(hex.substr(2,2), 16);
+    const b = parseInt(hex.substr(4,2), 16);
+    // formule YIQ
+    const yiq = (r*299 + g*587 + b*114) / 1000;
+    btn.style.color = yiq >= 128 ? '#000' : '#fff';
+  })();
+
     btn.classList.add('active');
     btn.onclick = () => {
       filterConfig[type].visible = !filterConfig[type].visible;
