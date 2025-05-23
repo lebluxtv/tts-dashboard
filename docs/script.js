@@ -1,4 +1,4 @@
-//script.js
+// script.js
 document.addEventListener('DOMContentLoaded', () => {
   // === 1) Références UI & variables globales ===
   const statusDot        = document.getElementById('status-dot');
@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const msgsPerMinSpan   = document.getElementById('osc-msg-min');
   const usersPerMinSpan  = document.getElementById('osc-users-min');
   const ttsInfoDiv       = document.getElementById('tts-info');
+  const ttsTimerInput    = document.getElementById('tts-timer');
+  const ttsTimerLabel    = document.getElementById('tts-timer-label');
 
   let chatBuffer    = [];
   let eventsBuffer  = [];
@@ -21,6 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastTtsTime, ttsProgressInterval, ttsTimeout;
   let timelineMode      = 'scale';
   let lastScaleSeconds  = 60;
+
+  // === TIMER ACTION ID dynamique ===
+  let TTS_TIMER_ACTION_ID = null;
+  let lastSentTimer = null;
 
   // === 1) labelConfig ===
   const labelConfig = {
@@ -100,6 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
         viewerCountSpan.textContent = '';
         viewerCountSpan.title = '';
       }
+      // === Récupération dynamique de l'ID de l'action TTS Timer Set ===
+      try {
+        const actions = await client.getActions();
+        const ttsTimer = actions.find(a => a.name === "TTS Timer Set");
+        if (ttsTimer) {
+          TTS_TIMER_ACTION_ID = ttsTimer.id;
+          // Envoie la valeur actuelle au chargement
+          const val = Number(ttsTimerInput.value) || 3;
+          sendTtsTimer(val);
+        } else {
+          console.warn("Action TTS Timer Set non trouvée !");
+        }
+      } catch(e) {
+        console.warn("Erreur récupération actions :", e);
+      }
     },
     onDisconnect: () => {
       statusDot.classList.replace('online','offline');
@@ -107,6 +128,46 @@ document.addEventListener('DOMContentLoaded', () => {
       viewerCountSpan.title = '';
     }
   });
+
+  // === 2-bis) TTS Timer Control ===
+  function sendTtsTimer(timerValue) {
+    if (!TTS_TIMER_ACTION_ID) return; // Attend que l'id soit chargé
+    if (timerValue == lastSentTimer) return;
+    lastSentTimer = timerValue;
+    client.doAction(TTS_TIMER_ACTION_ID, { timer: timerValue });
+    ttsTimerLabel.textContent = timerValue + ' min';
+  }
+
+  // Knob jQuery (si chargé)
+  if (window.$ && $(ttsTimerInput).data('knob') === undefined) {
+    $(ttsTimerInput).knob({
+      min: 1,
+      max: 10,
+      width: 48,
+      height: 48,
+      thickness: 0.4,
+      fgColor: "#ffef61",
+      bgColor: "#23262b",
+      inputColor: "#fff",
+      angleOffset: -125,
+      angleArc: 250,
+      displayInput: true,
+      release: function(val) {
+        sendTtsTimer(val);
+      },
+      change: function(val) {
+        ttsTimerLabel.textContent = val + ' min';
+      }
+    });
+  } else {
+    // Fallback : slider classique
+    ttsTimerInput.addEventListener('input', e => {
+      ttsTimerLabel.textContent = ttsTimerInput.value + ' min';
+    });
+    ttsTimerInput.addEventListener('change', e => {
+      sendTtsTimer(Number(ttsTimerInput.value));
+    });
+  }
 
   // === 3) dispatch events ===
   client.on('*', ({event,data}) => {
@@ -409,16 +470,16 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'HypeTrainUpdate':color='#ff5252'; break;
       case 'HypeTrainLevelUp':color='#ff3b3b'; break;
       case 'HypeTrainEnd': color='#ff2424'; break;
-      case 'RewardRedemption':color='#8e44ad'; break;
-      case 'RewardCreated': color='#9b59b6'; break;
-      case 'RewardUpdated': color='#71368a'; break;
-      case 'RewardDeleted': color='#5e3370'; break;
-      case 'CommunityGoalContribution':color='#2ecc71'; break;
-      case 'CommunityGoalEnded': color='#27ae60'; break;
-      case 'PollCreated': color='#3498db'; break;
-      case 'PollUpdated': color='#2980b9'; break;
-      case 'PollEnded': color='#1f618d'; break;
-      case 'TimedAction': color='#95a5a6'; break;
+      case 'RewardRedemption':color:'#8e44ad'; break;
+      case 'RewardCreated': color:'#9b59b6'; break;
+      case 'RewardUpdated': color:'#71368a'; break;
+      case 'RewardDeleted': color:'#5e3370'; break;
+      case 'CommunityGoalContribution':color:'#2ecc71'; break;
+      case 'CommunityGoalEnded': color:'#27ae60'; break;
+      case 'PollCreated': color:'#3498db'; break;
+      case 'PollUpdated': color:'#2980b9'; break;
+      case 'PollEnded': color:'#1f618d'; break;
+      case 'TimedAction': color:'#95a5a6'; break;
     }
     return { color, width };
   }
