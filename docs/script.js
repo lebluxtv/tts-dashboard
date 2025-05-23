@@ -205,7 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     eventsBuffer.forEach(ev => {
       if (!filterConfig[ev.type]?.visible) return;
-      let rawX = Math.round(W - (now - ev.time)/mpp);
+      const xRounded = Math.round((now - ev.time) / mpp / 2) * 2; // résolution de 2px bucket
+      let rawX = W - xRounded;
       if (rawX < 0 || rawX > W) return;
 
       let bucketX = rawX, idx = 0;
