@@ -1,4 +1,4 @@
-script.js
+//script.js
 document.addEventListener('DOMContentLoaded', () => {
   // === 1) Références UI & variables globales ===
   const statusDot        = document.getElementById('status-dot');
