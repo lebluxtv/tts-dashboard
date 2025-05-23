@@ -196,50 +196,50 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(() => dummy.append(Date.now(),0), 1000);
 
   // === 6) onDraw ===
-  smoothie.options.onDraw = function({ chart, chartWidth:W, chartHeight:H, options }) {
-    const now = Date.now();
-    const mpp = options.millisPerPixel;
-    const ctx = chart.canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
-ctx.translate(0.5, 0.5); // aligne les pixels
-    const tol = 5;
-    const overlaps = {};
+smoothie.options.onDraw = function({ chart, chartWidth: W, chartHeight: H, options }) {
+  const now = Date.now();
+  const mpp = options.millisPerPixel;
+  const ctx = chart.canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.translate(0.5, 0.5); // pixel snapping
 
-    eventsBuffer.forEach(ev => {
-      if (!filterConfig[ev.type]?.visible) return;
-//let rawX = Math.round(W - (now - ev.time)/mpp);
-if (!ev.xFixed) return; // sécurité si ancien format
-let rawX = Math.round(W - (now - ev.xFixed) / mpp);
-      if (rawX < 0 || rawX > W) return;
+  const tol = 5;
+  const overlaps = {};
 
-      let bucketX = rawX, idx = 0;
-      if (ev.type !== 'chat') {
-        bucketX = Math.round(rawX / tol) * tol;
-        idx = overlaps[bucketX] || 0;
-        overlaps[bucketX] = idx + 1;
-      }
+  eventsBuffer.forEach(ev => {
+    if (!ev.xFixed || !filterConfig[ev.type]?.visible) return;
 
-      const { color, width } = getStyleFor(ev.type);
+    let rawX = Math.round(W - (now - ev.xFixed) / mpp);
+    if (rawX < 0 || rawX > W) return;
 
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = width;
-      ctx.beginPath();
-      ctx.moveTo(rawX,5);
-      ctx.lineTo(rawX,H-5);
-      ctx.stroke();
+    let bucketX = rawX, idx = 0;
+    if (ev.type !== 'chat') {
+      bucketX = Math.round(rawX / tol) * tol;
+      idx = overlaps[bucketX] || 0;
+      overlaps[bucketX] = idx + 1;
+    }
 
-      ctx.beginPath();
-      drawIcon(ev.type, ctx, rawX, H);
-      ctx.fillStyle = color;
-      ctx.fill();
+    const { color, width } = getStyleFor(ev.type);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(rawX, 5);
+    ctx.lineTo(rawX, H - 5);
+    ctx.stroke();
 
-      if (filterConfig[ev.type].labels) {
-        drawLabel(ev, ctx, rawX, idx);
-      }
-      ctx.restore();
-    });
-  };
+    ctx.beginPath();
+    drawIcon(ev.type, ctx, rawX, H);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    if (filterConfig[ev.type].labels) {
+      drawLabel(ev, ctx, rawX, idx);
+    }
+    ctx.restore();
+  });
+};
+
   smoothie.streamTo(oscillo,0);
 
   // === 7) timeline controls ===
@@ -338,64 +338,63 @@ let rawX = Math.round(W - (now - ev.xFixed) / mpp);
   });
 
   // === 12) handleCustomEvent ===
-  function handleCustomEvent({ type, time:eventTime, ...payload }){
-    const time = eventTime || Date.now();
+function handleCustomEvent({ type, time: eventTime, ...payload }) {
+  const time = typeof eventTime === 'number' ? eventTime : Date.now();
 
-    if (type==='chat'){
-      chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
-      if (chatBuffer.length>maxChat) chatBuffer.shift();
-     // eventsBuffer.push({ type,time,...payload });
-const xFixed = Date.now(); // ← on fige le moment d’affichage
-eventsBuffer.push({ type, time, xFixed, ...payload });
-      if (eventsBuffer.length>1000) eventsBuffer.shift();
-      renderChat();
-      return;
-    }
-
-    if (type==='tts'){
-      const ttsUser = payload.user||payload.selectedUser;
-      setTtsHeader(ttsUser,payload.message);
-      ttsPanel.classList.add('twitch-tts-glow');
-      setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
-
-      chatBuffer.push({ time,user:ttsUser,message:payload.message,eligible:true,isTTS:true });
-      if (chatBuffer.length>maxChat) chatBuffer.shift();
-      renderChat();
-
-      eventsBuffer.push({ type,time,...payload });
-      if (eventsBuffer.length>1000) eventsBuffer.shift();
-
-      // détails TTS
-      ttsInfoDiv.innerHTML = '';
-      if (Array.isArray(payload.candidatesPanel)){
-        const entry = payload.candidatesPanel.find(e=>e.user===ttsUser);
-        if (entry){
-          const ul = document.createElement('ul');
-          ul.innerHTML = `
-            <li><strong>Utilisateur :</strong> ${ttsUser}</li>
-            <li><strong>Messages :</strong> ${entry.messages}</li>
-            <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
-            <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
-            <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
-            <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
-          `;
-          ttsInfoDiv.appendChild(ul);
-        }
-      } else {
-        ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
-      }
-      return;
-    }
-
-    if (type==='tick'){
-      eventsBuffer.push({ type,time,...payload });
-      if (eventsBuffer.length>1000) eventsBuffer.shift();
-      return;
-    }
-
-    eventsBuffer.push({ type,time,...payload });
-    if (eventsBuffer.length>1000) eventsBuffer.shift();
+  if (type === 'chat') {
+    chatBuffer.push({ time, user: payload.user, message: payload.message, eligible: payload.isEligible });
+    if (chatBuffer.length > maxChat) chatBuffer.shift();
+    eventsBuffer.push({ type, time, xFixed: time, ...payload });
+    if (eventsBuffer.length > 1000) eventsBuffer.shift();
+    renderChat();
+    return;
   }
+
+  if (type === 'tts') {
+    const ttsUser = payload.user || payload.selectedUser;
+    setTtsHeader(ttsUser, payload.message);
+    ttsPanel.classList.add('twitch-tts-glow');
+    setTimeout(() => ttsPanel.classList.remove('twitch-tts-glow'), 3000);
+
+    chatBuffer.push({ time, user: ttsUser, message: payload.message, eligible: true, isTTS: true });
+    if (chatBuffer.length > maxChat) chatBuffer.shift();
+    renderChat();
+
+    eventsBuffer.push({ type, time, xFixed: time, ...payload });
+    if (eventsBuffer.length > 1000) eventsBuffer.shift();
+
+    // infos TTS
+    ttsInfoDiv.innerHTML = '';
+    if (Array.isArray(payload.candidatesPanel)) {
+      const entry = payload.candidatesPanel.find(e => e.user === ttsUser);
+      if (entry) {
+        const ul = document.createElement('ul');
+        ul.innerHTML = `
+          <li><strong>Utilisateur :</strong> ${ttsUser}</li>
+          <li><strong>Messages :</strong> ${entry.messages}</li>
+          <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
+          <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
+          <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
+          <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
+        `;
+        ttsInfoDiv.appendChild(ul);
+      }
+    } else {
+      ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
+    }
+    return;
+  }
+
+  if (type === 'tick') {
+    eventsBuffer.push({ type, time, xFixed: time, ...payload });
+    if (eventsBuffer.length > 1000) eventsBuffer.shift();
+    return;
+  }
+
+  eventsBuffer.push({ type, time, xFixed: time, ...payload });
+  if (eventsBuffer.length > 1000) eventsBuffer.shift();
+}
+
 
   // === 13) helpers ===
   function getStyleFor(type){
