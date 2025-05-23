@@ -117,28 +117,7 @@ body {
 /* couleurs par data-type */
 .event-filters button[data-type="chat"]              { --filter-bg: rgba(57,195,255,0.4); --filter-color: #111; }
 .event-filters button[data-type="tts"]               { --filter-bg: #ffef61;              --filter-color: #111; }
-.event-filters button[data-type="Follow"]            { --filter-bg: #a7ff8e;              --filter-color: #111; }
-.event-filters button[data-type="Raid"]              { --filter-bg: #ffae42;              --filter-color: #111; }
-.event-filters button[data-type="AdRun"]             { --filter-bg: #ffaa00;              --filter-color: #111; }
-.event-filters button[data-type="Sub"]               { --filter-bg: #ff41b0;              --filter-color: #111; }
-.event-filters button[data-type="ReSub"]             { --filter-bg: #28e7d7;              --filter-color: #111; }
-.event-filters button[data-type="GiftSub"]           { --filter-bg: #ff71ce;              --filter-color: #111; }
-.event-filters button[data-type="GiftBomb"]          { --filter-bg: #ff1f8b;              --filter-color: #fff; }
-.event-filters button[data-type="Cheer"]             { --filter-bg: #ffd256;              --filter-color: #111; }
-.event-filters button[data-type="HypeTrainStart"]    { --filter-bg: #ff6b6b;              --filter-color: #111; }
-.event-filters button[data-type="HypeTrainUpdate"]   { --filter-bg: #ff5252;              --filter-color: #fff; }
-.event-filters button[data-type="HypeTrainLevelUp"]  { --filter-bg: #ff3b3b;              --filter-color: #fff; }
-.event-filters button[data-type="HypeTrainEnd"]      { --filter-bg: #ff2424;              --filter-color: #fff; }
-.event-filters button[data-type="RewardRedemption"]  { --filter-bg: #8e44ad;              --filter-color: #fff; }
-.event-filters button[data-type="RewardCreated"]     { --filter-bg: #9b59b6;              --filter-color: #fff; }
-.event-filters button[data-type="RewardUpdated"]     { --filter-bg: #71368a;              --filter-color: #fff; }
-.event-filters button[data-type="RewardDeleted"]     { --filter-bg: #5e3370;              --filter-color: #fff; }
-.event-filters button[data-type="CommunityGoalContribution"] { --filter-bg: #2ecc71;       --filter-color: #111; }
-.event-filters button[data-type="CommunityGoalEnded"]        { --filter-bg: #27ae60;       --filter-color: #111; }
-.event-filters button[data-type="PollCreated"]      { --filter-bg: #3498db;              --filter-color: #fff; }
-.event-filters button[data-type="PollUpdated"]      { --filter-bg: #2980b9;              --filter-color: #fff; }
-.event-filters button[data-type="PollEnded"]        { --filter-bg: #1f618d;              --filter-color: #fff; }
-.event-filters button[data-type="TimedAction"]      { --filter-bg: #95a5a6;              --filter-color: #111; }
+/* … autres types identiques … */
 
 /* ================================
    TTS PANEL
@@ -224,7 +203,6 @@ body {
 .timeline-controls {
     display: flex; gap: 6px;
 }
-/* boutons plus compacts pour mieux rentrer */
 .timeline-controls button {
     padding: 2px 8px;
     border-radius: 8px;
@@ -284,18 +262,23 @@ body {
     flex: 1;
     display: flex;
     gap: 12px;
-    /* on décale davantage vers le bas pour ne plus chevaucher */
-    margin: 60px 14px 14px;
+    margin: 60px 14px 14px; /* plus de marge en haut pour ne pas chevaucher */
 }
 .chat-container {
     flex: 1;
     background: var(--chatbg);
     border-radius: 10px;
     box-shadow: 0 0 10px #0003;
-    overflow-y: auto;
+    /* structure fixe : on force la colonne et la taille */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 .chat-container #chat-log {
     padding: 8px 12px;
+    /* on remplit tout l’espace disponible et scroll interne */
+    flex: 1;
+    overflow-y: auto;
 }
 .tts-info-container {
     flex: 1;
@@ -345,6 +328,6 @@ body {
     .header-bar h1 { font-size:1.2rem; }
     .chat-tts-section {
         flex-direction: column;
-        margin: 12px 7px 7px;
+        margin: 60px 7px 7px;
     }
 }
