@@ -284,7 +284,8 @@ body {
     flex: 1;
     display: flex;
     gap: 12px;
-    margin: 12px 14px 14px;    /* <-- décalage vers le bas pour ne plus chevaucher */
+    /* on décale davantage vers le bas pour ne plus chevaucher */
+    margin: 60px 14px 14px;
 }
 .chat-container {
     flex: 1;
