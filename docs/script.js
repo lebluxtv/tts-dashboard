@@ -99,16 +99,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const resp = await client.getActiveViewers();
         const n = resp.viewers.length;
         viewerCountSpan.textContent = n ? `👀 ${n}` : '';
-        viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
+        viewerCountSpan.title       = resp.viewers.map(v=>v.display).join(', ');
       } catch {
         viewerCountSpan.textContent = '';
-        viewerCountSpan.title = '';
+        viewerCountSpan.title       = '';
       }
     },
     onDisconnect: () => {
       statusDot.classList.replace('online','offline');
       viewerCountSpan.textContent = '';
-      viewerCountSpan.title = '';
+      viewerCountSpan.title       = '';
     }
   });
 
@@ -240,8 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function adaptTimeline() {
     if (!chatBuffer.length || timelineMode!=='adapt') return;
     const t0 = Number(new Date(chatBuffer[0].time));
-    const duration = Date.now() - t0;
-    smoothie.options.millisPerPixel = Math.max(duration/oscillo.width, 10);
+    smoothie.options.millisPerPixel = Math.max((Date.now()-t0)/oscillo.width, 10);
   }
   setTimelineWindow('scale',60);
   setInterval(adaptTimeline,1500);
@@ -294,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save-session').addEventListener('click',()=>{
     const blob = new Blob([JSON.stringify({chat:chatBuffer,events:eventsBuffer},null,2)],{type:'application/json'});
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href     = URL.createObjectURL(blob);
     a.download = `tts-dashboard_${new Date().toISOString()}.json`;
     a.style.display='none';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -307,8 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
     r.onload = ev=>{
       try {
         const sess = JSON.parse(ev.target.result);
-        chatBuffer    = Array.isArray(sess.chat)?sess.chat:[];
-        eventsBuffer  = Array.isArray(sess.events)?sess.events:[];
+        chatBuffer   = Array.isArray(sess.chat)?sess.chat:[];
+        eventsBuffer = Array.isArray(sess.events)?sess.events:[];
         renderChat();
         if (timelineMode==='adapt') adaptTimeline();
         alert('Log chargé !');
@@ -333,10 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (type==='tts') {
       const ttsUser = payload.user ?? payload.selectedUser;
-      setTtsHeader(ttsUser,payload.message);
+      setTtsHeader(ttsUser, payload.message);
       ttsPanel.classList.add('twitch-tts-glow');
       setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
-      chatBuffer.push({ time,user:ttsUser,message:payload.message,eligible:true,isTTS:true });
+      chatBuffer.push({ time, user:ttsUser, message:payload.message, eligible:true, isTTS:true });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
       renderChat();
       eventsBuffer.push({ type,time,...payload });
@@ -352,90 +351,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (eventsBuffer.length>1000) eventsBuffer.shift();
   }
 
-  // === 13) Helpers: styles, icônes, labels ===
-  function getStyleFor(type) {
-    let color='#888888', width=2;
-    switch(type) {
-      case 'tts':      color='#ffef61'; break;
-      case 'chat':     color='rgba(57,195,255,0.4)'; width=1; break;
-      case 'Cheer':    color='#ffd256'; break;
-      case 'Follow':   color='#a7ff8e'; break;
-      case 'Raid':     color='#ffae42'; break;
-      case 'AdRun':    color='#ffaa00'; break;
-      case 'Sub':      color='#ff41b0'; break;
-      case 'ReSub':    color='#28e7d7'; break;
-      case 'GiftSub':  color='#ff71ce'; break;
-      case 'GiftBomb': color='#ff1f8b'; break;
-      case 'HypeTrainStart':   color='#ff6b6b'; break;
-      case 'HypeTrainUpdate':  color='#ff5252'; break;
-      case 'HypeTrainLevelUp': color='#ff3b3b'; break;
-      case 'HypeTrainEnd':     color='#ff2424'; break;
-      case 'RewardRedemption': color='#8e44ad'; break;
-      case 'RewardCreated':    color='#9b59b6'; break;
-      case 'RewardUpdated':    color='#71368a'; break;
-      case 'RewardDeleted':    color='#5e3370'; break;
-      case 'CommunityGoalContribution': color='#2ecc71'; break;
-      case 'CommunityGoalEnded':        color='#27ae60'; break;
-      case 'PollCreated':      color='#3498db'; break;
-      case 'PollUpdated':      color='#2980b9'; break;
-      case 'PollEnded':        color='#1f618d'; break;
-      case 'TimedAction':      color='#95a5a6'; break;
-    }
-    return { color, width };
-  }
-
-  function drawIcon(type, ctx, x, H) {
-    if      (type==='tts')     ctx.arc(x,H-18,  8,0,2*Math.PI);
-    else if (type==='chat')    ctx.arc(x,H-12,  4,0,2*Math.PI);
-    else if (type==='Follow')  ctx.arc(x,H-18,  6,0,2*Math.PI);
-    else                       ctx.rect(x-6,H-25,13,13);
-  }
-
-  function drawLabel(ev, ctx, x, idx) {
-    const cfg = labelConfig[ev.type]||labelConfig.default;
-    const lineHeight = parseInt(cfg.font,10)+2;
-    const baseY = cfg.y + idx*lineHeight*2;
-    ctx.font      = cfg.font;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = cfg.color;
-
-    if (ev.type==='TimedAction' && ev.name) {
-      ctx.fillText(ev.type, x, baseY);
-      ctx.fillText(ev.name, x, baseY+lineHeight);
-    }
-    else if (ev.type==='Follow' && ev.displayName) {
-      ctx.fillText(ev.type, x, baseY);
-      ctx.fillText(ev.displayName, x, baseY+lineHeight);
-    }
-    else if (ev.type==='Cheer' && ev.message && ev.message.hasBits) {
-      ctx.fillText(ev.type, x, baseY);
-      ctx.fillText(`${ev.message.bits} bits`, x, baseY+lineHeight);
-      ctx.fillText(ev.message.displayName, x, baseY+lineHeight*2);
-    }
-    else {
-      ctx.fillText(ev.type, x, baseY);
-    }
-  }
-
   // === Final init calls & métriques live ===
   renderChat();
   resizeOscillo();
+
+  // — viewers live & msgs/min & users/min toutes les 10s
   setInterval(async ()=>{
-    // — viewers live & title
     try {
       const r = await client.getActiveViewers();
       const n = r.viewers.length;
-      viewerCountSpan.textContent = n?`👀 ${n}`:'';
-      viewerCountSpan.title = r.viewers.map(v=>v.display).join(', ');
+      viewerCountSpan.textContent = n ? `👀 ${n}` : '';
+      viewerCountSpan.title       = r.viewers.map(v=>v.display).join(', ');
     } catch {
       viewerCountSpan.textContent = '';
-      viewerCountSpan.title = '';
+      viewerCountSpan.title       = '';
     }
-    // — msgs/s (SmoothieChart met déjà à jour .osc-msg et .osc-users automatiquement)
-    // — msgs/min & users/min
     const oneMinAgo = Date.now() - 60_000;
     const recent    = chatBuffer.filter(m => m.time >= oneMinAgo);
     msgsPerMinSpan.textContent  = recent.length;
     usersPerMinSpan.textContent = new Set(recent.map(m => m.user)).size;
-  }, 10000);
+  }, 10_000);
+
+  // — msgs/s & users/s toutes les 1s
+  setInterval(()=>{
+    const oneSecAgo = Date.now() - 1_000;
+    const lastSec   = chatBuffer.filter(m => m.time >= oneSecAgo);
+    document.querySelector('.osc-msg').textContent   = lastSec.length;
+    document.querySelector('.osc-users').textContent = new Set(lastSec.map(m=>m.user)).size;
+  }, 1_000);
+
 });
