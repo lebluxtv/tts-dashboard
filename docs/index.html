@@ -5,6 +5,10 @@
     <title>TTS Auto Message Reader - Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
+    <!-- jQuery nécessaire pour le knob -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery Knob -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-knob/1.2.13/jquery.knob.min.js"></script>
     <script src="smoothie.mod.js"></script>
     <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
 </head>
@@ -26,6 +30,11 @@
                     📂 Charger un log
                     <input type="file" id="load-session" accept=".json" style="display:none;">
                 </label>
+                <!-- Contrôle du timer via knob -->
+                <div class="timer-control">
+                    <input type="text" id="tts-timer" value="3" min="1" max="10">
+                    <span id="tts-timer-label">3 min</span>
+                </div>
             </div>
         </header>
 
@@ -78,5 +87,22 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+      // Initialisation du knob
+      $(function() {
+        $('#tts-timer').knob({
+          min: 1,
+          max: 10,
+          step: 1,
+          width:  Fifty,
+          height: Fifty,
+          fgColor: '#ffef61',
+          release: function(v) {
+            $('#tts-timer-label').text(v + ' min');
+            // ici on pourra envoyer directement le nouvel intervalle via websocket...
+          }
+        });
+      });
+    </script>
 </body>
 </html>
