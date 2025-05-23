@@ -332,7 +332,7 @@ height: 320px;
     display: flex;
     flex-direction: row;
     gap: 18px;
-    margin: 60px 14px 14px 14px;
+    margin: 80px 14px 14px 14px;
     min-height: 200px;
     height: 380px;
     max-height: 42vh;
