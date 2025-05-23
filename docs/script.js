@@ -240,19 +240,23 @@ document.addEventListener('DOMContentLoaded', () => {
       fontSize: 14,
       precision: 0
     },
-    timestampFormatter: date => {
-      const s  = date.getSeconds();
-      if (timelineMode === 'scale') {
-        if (lastScaleSeconds === 60) {
-          if (s % 5 === 0) return `+${s}s`;
-        } else if (lastScaleSeconds === 300) {
-          if (s % 30 === 0) return `+${s}s`;
-        } else if (lastScaleSeconds === 600) {
-          if (s === 0) return `+${date.getMinutes()}m`;
-        }
-      }
-      return '';
+timestampFormatter: date => {
+  // On récupère la config du mode (1, 5 ou 10 min)
+  if (timelineMode === 'scale') {
+    if (lastScaleSeconds === 60) { // 1 min window
+      // Une grille chaque 5s, label sur chaque barre
+      if (date.getSeconds() % 5 === 0) return "+5s";
+    } else if (lastScaleSeconds === 300) { // 5 min window
+      // Une grille chaque 5s, label chaque 30s (6 barres)
+      if (date.getSeconds() % 30 === 0 && date.getSeconds() !== 0) return "+30s";
+    } else if (lastScaleSeconds === 600) { // 10 min window
+      // Une grille chaque 5s, label chaque 60s (12 barres)
+      if (date.getSeconds() === 0) return "+1min";
     }
+  }
+  return '';
+}
+
   });
   const dummy = new TimeSeries();
   smoothie.addTimeSeries(dummy, { strokeStyle:'rgba(0,0,0,0)', lineWidth:0 });
