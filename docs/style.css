@@ -168,7 +168,7 @@ body {
     animation: tts-glow-fade 3s linear forwards;
     pointer-events: none;
 }
-@keyframes tts-glow-fade { from{opacity:1} to{opacity:0}}
+@keyframes tts-glow-fade { from{opacity:1} to{opacity:0} }
 
 #tts-header {
     background: #232b2e;
@@ -277,13 +277,13 @@ body {
 
 /* ================================
    SPLIT CHAT / TTS INFO
-   ================================
-*/
+   ================================ */
 .chat-tts-section {
     flex: 1;
     display: flex;
     gap: 12px;
     margin: 0 14px 14px;
+    min-height: 0;
 }
 .chat-container {
     flex: 1;
@@ -291,9 +291,11 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px #0003;
     overflow-y: auto;
+    min-height: 0;
 }
 .chat-container #chat-log {
     padding: 8px 12px;
+    height: 100%;
 }
 .tts-info-container {
     flex: 1;
@@ -303,6 +305,7 @@ body {
     box-shadow: 0 2px 12px #0007;
     color: var(--text);
     overflow-y: auto;
+    min-height: 0;
 }
 .tts-info-container h2 {
     margin: 0 0 8px;
