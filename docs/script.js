@@ -1,4 +1,4 @@
-// script.js
+script.js
 document.addEventListener('DOMContentLoaded', () => {
   // === 1) Références UI & variables globales ===
   const statusDot        = document.getElementById('status-dot');
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const resp = await client.getActiveViewers();
         const n = resp.viewers.length;
-        viewerCountSpan.textContent = n?👀 ${n}:'';
+        viewerCountSpan.textContent = n?`👀 ${n}`:'';
         viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
       } catch {
         viewerCountSpan.textContent = '';
@@ -181,11 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const s  = date.getSeconds();
       if (timelineMode === 'scale') {
         if (lastScaleSeconds === 60) {
-          if (s % 5 === 0) return +${s}s;
+          if (s % 5 === 0) return `+${s}s`;
         } else if (lastScaleSeconds === 300) {
-          if (s % 30 === 0) return +${s}s;
+          if (s % 30 === 0) return `+${s}s`;
         } else if (lastScaleSeconds === 600) {
-          if (s === 0) return +${date.getMinutes()}m;
+          if (s === 0) return `+${date.getMinutes()}m`;
         }
       }
       return '';
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineBtns.forEach(b=>b.classList.remove('active'));
     if (mode==='scale'){
       lastScaleSeconds = secs;
-      document.querySelector([data-scale="${secs}"]).classList.add('active');
+      document.querySelector(`[data-scale="${secs}"]`).classList.add('active');
       smoothie.options.millisPerPixel = (secs*1000)/oscillo.width;
     } else {
       document.querySelector('[data-scale="adapt"]').classList.add('active');
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       chatDiv.innerHTML = chatBuffer.slice(-100).map(m=>{
         const cls = m.isTTS ? 'chat-msg chat-tts' : 'chat-msg';
-        return <div class="${cls}"><span class="chat-usr">${m.user}:</span><span class="chat-text">${m.message}</span></div>;
+        return `<div class="${cls}"><span class="chat-usr">${m.user}:</span><span class="chat-text">${m.message}</span></div>`;
       }).join('');
     }
     if (atBottom) chatDiv.scrollTop = chatDiv.scrollHeight;
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 9) setTtsHeader ===
   function setTtsHeader(user,msg){
-    ttsHeader.innerHTML = <span style="color:#a5ffef">${user}</span> : ${msg};
+    ttsHeader.innerHTML = `<span style="color:#a5ffef">${user}</span> : ${msg}`;
     lastTtsTime = Date.now();
     clearInterval(ttsProgressInterval);
     clearTimeout(ttsTimeout);
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const blob = new Blob([JSON.stringify({chat:chatBuffer,events:eventsBuffer},null,2)],{type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = tts-dashboard_${new Date().toISOString()}.json;
+    a.download = `tts-dashboard_${new Date().toISOString()}.json`;
     a.style.display='none';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
@@ -365,14 +365,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const entry = payload.candidatesPanel.find(e=>e.user===ttsUser);
         if (entry){
           const ul = document.createElement('ul');
-          ul.innerHTML = 
+          ul.innerHTML = `
             <li><strong>Utilisateur :</strong> ${ttsUser}</li>
             <li><strong>Messages :</strong> ${entry.messages}</li>
             <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
             <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
             <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
             <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
-          ;
+          `;
           ttsInfoDiv.appendChild(ul);
         }
       } else {
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     else if (ev.type==='Cheer'&&ev.message&&ev.message.hasBits){
       ctx.fillText(ev.type,x,baseY);
-      ctx.fillText(${ev.message.bits} bits,x,baseY+lineHeight);
+      ctx.fillText(`${ev.message.bits} bits`,x,baseY+lineHeight);
       ctx.fillText(ev.message.displayName,x,baseY+lineHeight*2);
     }
     else {
@@ -465,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const r = await client.getActiveViewers();
       const n = r.viewers.length;
-      viewerCountSpan.textContent = n?👀 ${n}:'';
+      viewerCountSpan.textContent = n?`👀 ${n}`:'';
       viewerCountSpan.title = r.viewers.map(v=>v.display).join(', ');
     } catch {
       viewerCountSpan.textContent = '';
