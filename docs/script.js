@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // couleur de fond
     btn.style.backgroundColor = cfg.color;
     // contraste YIQ pour le texte
-    (()=>{
+    (() => {
       const hex = cfg.color.replace('#','');
       const r = parseInt(hex.substr(0,2),16),
             g = parseInt(hex.substr(2,2),16),
@@ -173,9 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // === 5) Initialisation de SmoothieChart ===
   const smoothie = new SmoothieChart({
     millisPerPixel: 60,
-    grid: { strokeStyle:'#233', fillStyle:'#16181c', lineWidth:1, millisPerLine:1000, verticalSections:6 },
-    labels: { fillStyle:'#ececec', fontSize:14, precision:0 },
-    timestampFormatter: SmoothieChart.timeFormatter
+    grid: {
+      strokeStyle:   '#233',
+      fillStyle:     '#16181c',
+      lineWidth:     1,
+      millisPerLine: 5000,
+      verticalSections: 6
+    },
+    labels: {
+      fillStyle: '#ececec',
+      fontSize: 14,
+      precision: 0
+    },
+    timestampFormatter: date => {
+      const s = date.getSeconds();
+      return (s % 5 === 0) ? `${s<10?'0':''}${s}s` : '';
+    }
   });
   const dummy = new TimeSeries();
   smoothie.addTimeSeries(dummy, { strokeStyle:'rgba(0,0,0,0)', lineWidth:0 });
@@ -191,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     eventsBuffer.forEach(ev => {
       if (!filterConfig[ev.type]?.visible) return;
-      const rawX = W - (now - ev.time)/mpp;
+      let rawX = W - (now - ev.time)/mpp;
+      rawX = Math.round(rawX);
       if (rawX<0 || rawX>W) return;
 
       let bucketX, idx;
@@ -325,10 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 12) Handler custom events ===
   function handleCustomEvent({ type, time:eventTime, ...payload }) {
-    console.log('EV RAW →', type, payload);
     const time = eventTime || Date.now();
 
-    // Chat → buffer + affichage
     if (type==='chat') {
       chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
@@ -338,24 +350,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // TTS selection → header, chat, info-panel
     if (type==='tts') {
       const ttsUser = payload.user ?? payload.selectedUser;
       setTtsHeader(ttsUser, payload.message);
       ttsPanel.classList.add('twitch-tts-glow');
       setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
 
-      // mise à jour du chat
       chatBuffer.push({ time, user:ttsUser, message:payload.message, eligible:true, isTTS:true });
       if (chatBuffer.length>maxChat) chatBuffer.shift();
       renderChat();
 
-      // stocker dans events et limiter taille
       eventsBuffer.push({ type,time,...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
 
-      // --- NOUVELLE PARTIE : remplir le panneau Détails TTS ---
-      ttsInfoDiv.innerHTML = '';  // on efface
+      ttsInfoDiv.innerHTML = '';
       if (Array.isArray(payload.candidatesPanel)) {
         const entry = payload.candidatesPanel.find(e => e.user === ttsUser);
         if (entry) {
@@ -377,14 +385,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Tick ou autres events → on stocke pour le timeline
     if (type==='tick') {
       eventsBuffer.push({ type,time,...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
       return;
     }
 
-    // tout autre event → on stocke
     eventsBuffer.push({ type,time,...payload });
     if (eventsBuffer.length>1000) eventsBuffer.shift();
   }
