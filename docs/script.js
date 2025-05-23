@@ -165,9 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const smoothie = new SmoothieChart({
     millisPerPixel: 60,
     grid: {
-      strokeStyle: '#233',
-      fillStyle:   '#16181c',
-      lineWidth:   1,
+      strokeStyle:   '#233',
+      fillStyle:     '#16181c',
+      lineWidth:     1,
       millisPerLine: 5000,
       verticalSections: 6
     },
@@ -176,7 +176,20 @@ document.addEventListener('DOMContentLoaded', () => {
       fontSize: 14,
       precision: 0
     },
-    timestampFormatter: () => '+5s'
+    // Affichage logique des repères selon le scale
+    timestampFormatter: date => {
+      const s  = date.getSeconds();
+      if (timelineMode === 'scale') {
+        if (lastScaleSeconds === 60) {
+          if (s % 5 === 0) return `+${s}s`;
+        } else if (lastScaleSeconds === 300) {
+          if (s % 30 === 0) return `+${s}s`;
+        } else if (lastScaleSeconds === 600) {
+          if (s === 0) return `+${date.getMinutes()}m`;
+        }
+      }
+      return '';
+    }
   });
   const dummy = new TimeSeries();
   smoothie.addTimeSeries(dummy, { strokeStyle:'rgba(0,0,0,0)', lineWidth:0 });
@@ -193,13 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
     eventsBuffer.forEach(ev => {
       if (!filterConfig[ev.type]?.visible) return;
       let rawX = Math.round(W - (now - ev.time)/mpp);
-      if (rawX<0 || rawX>W) return;
+      if (rawX < 0 || rawX > W) return;
 
-      let idx = 0, bucketX = rawX;
-      if (ev.type!=='chat'){
-        bucketX = Math.round(rawX/tol)*tol;
-        idx = overlaps[bucketX]||0;
-        overlaps[bucketX] = idx+1;
+      let bucketX = rawX, idx = 0;
+      if (ev.type !== 'chat') {
+        bucketX = Math.round(rawX / tol) * tol;
+        idx = overlaps[bucketX] || 0;
+        overlaps[bucketX] = idx + 1;
       }
 
       const { color, width } = getStyleFor(ev.type);
@@ -213,12 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.stroke();
 
       ctx.beginPath();
-      drawIcon(ev.type,ctx,rawX,H);
+      drawIcon(ev.type, ctx, rawX, H);
       ctx.fillStyle = color;
       ctx.fill();
 
-      if (filterConfig[ev.type].labels){
-        drawLabel(ev,ctx,rawX,idx);
+      if (filterConfig[ev.type].labels) {
+        drawLabel(ev, ctx, rawX, idx);
       }
       ctx.restore();
     });
@@ -240,8 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function adaptTimeline(){
     if (!chatBuffer.length || timelineMode!=='adapt') return;
-    const t0 = Number(new Date(chatBuffer[0].time));
-    const dur = Date.now()-t0;
+    const t0  = Number(new Date(chatBuffer[0].time));
+    const dur = Date.now() - t0;
     smoothie.options.millisPerPixel = Math.max(Math.floor(dur/oscillo.width),10);
   }
   setTimelineWindow('scale',60);
@@ -255,12 +268,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 8) render chat ===
   function renderChat(){
-    const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight+20;
-    if (!chatBuffer.length){
+    const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop <= chatDiv.clientHeight + 20;
+    if (!chatBuffer.length) {
       chatDiv.innerHTML = '<div class="chat-msg empty"><span class="chat-usr">…</span><span class="chat-text">Aucun message reçu</span></div>';
     } else {
       chatDiv.innerHTML = chatBuffer.slice(-100).map(m=>{
-        const cls = m.isTTS?'chat-msg chat-tts':'chat-msg';
+        const cls = m.isTTS ? 'chat-msg chat-tts' : 'chat-msg';
         return `<div class="${cls}"><span class="chat-usr">${m.user}:</span><span class="chat-text">${m.message}</span></div>`;
       }).join('');
     }
@@ -322,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 12) handleCustomEvent ===
   function handleCustomEvent({ type, time:eventTime, ...payload }){
-    const time = eventTime||Date.now();
+    const time = eventTime || Date.now();
 
     if (type==='chat'){
       chatBuffer.push({ time, user:payload.user, message:payload.message, eligible:payload.isEligible });
