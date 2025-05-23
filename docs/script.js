@@ -108,11 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       // === Récupération dynamique de l'ID de l'action TTS Timer Set ===
       try {
-        const actions = await client.getActions();
-        const ttsTimer = actions.find(a => a.name === "TTS Timer Set");
+        const actionsObj = await client.getActions();
+        // actionsObj.actions (et non juste actionsObj !)
+        const ttsTimer = actionsObj.actions.find(a => a.name === "TTS Timer Set");
         if (ttsTimer) {
           TTS_TIMER_ACTION_ID = ttsTimer.id;
-          // Envoie la valeur actuelle au chargement
+          // Envoie la valeur actuelle au chargement (optionnel)
           const val = Number(ttsTimerInput.value) || 3;
           sendTtsTimer(val);
         } else {
@@ -131,7 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === 2-bis) TTS Timer Control ===
   function sendTtsTimer(timerValue) {
-    if (!TTS_TIMER_ACTION_ID) return; // Attend que l'id soit chargé
+    if (!TTS_TIMER_ACTION_ID) {
+      console.warn("TTS_TIMER_ACTION_ID non chargé !");
+      return; // Attend que l'id soit chargé
+    }
     if (timerValue == lastSentTimer) return;
     lastSentTimer = timerValue;
     client.doAction(TTS_TIMER_ACTION_ID, { timer: timerValue });
@@ -159,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ttsTimerLabel.textContent = val + ' min';
       }
     });
-  } else {
+  } else if (ttsTimerInput) {
     // Fallback : slider classique
     ttsTimerInput.addEventListener('input', e => {
       ttsTimerLabel.textContent = ttsTimerInput.value + ' min';
