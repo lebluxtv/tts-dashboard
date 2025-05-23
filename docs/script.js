@@ -272,7 +272,8 @@ timestampFormatter: date => {
 
     eventsBuffer.forEach(ev => {
       if (!filterConfig[ev.type]?.visible) return;
-      let rawX = Math.round(W - (now - ev.time)/mpp);
+      let rawX = W - (now - ev.time)/mpp;
+
       if (rawX < 0 || rawX > W) return;
 
       let bucketX = rawX, idx = 0;
