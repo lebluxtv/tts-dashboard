@@ -18,6 +18,36 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastTtsTime, ttsProgressInterval, ttsTimeout;
   let timelineMode     = 'scale';
   let lastScaleSeconds = 60;
+
+  // === labelConfig: per-type label positions & styles ===
+  const labelConfig = {
+    tts:   { y: 20, font: '10px sans-serif', color: '#ffef61' },
+    chat:  { y: 12, font: '10px sans-serif', color: 'rgba(57,195,255,1)' },
+    Follow:                    { y: 15, font: '10px sans-serif', color: '#a7ff8e' },
+    Raid:                      { y: 15, font: '10px sans-serif', color: '#ffae42' },
+    AdRun:                     { y: 15, font: '10px sans-serif', color: '#ffaa00' },
+    Sub:                       { y: 15, font: '10px sans-serif', color: '#ff41b0' },
+    ReSub:                     { y: 15, font: '10px sans-serif', color: '#28e7d7' },
+    GiftSub:                   { y: 15, font: '10px sans-serif', color: '#ff71ce' },
+    GiftBomb:                  { y: 15, font: '10px sans-serif', color: '#ff1f8b' },
+    Cheer:                     { y: 15, font: '10px sans-serif', color: '#ffd256' },
+    HypeTrainStart:            { y: 15, font: '10px sans-serif', color: '#ff6b6b' },
+    HypeTrainUpdate:           { y: 15, font: '10px sans-serif', color: '#ff5252' },
+    HypeTrainLevelUp:          { y: 15, font: '10px sans-serif', color: '#ff3b3b' },
+    HypeTrainEnd:              { y: 15, font: '10px sans-serif', color: '#ff2424' },
+    RewardRedemption:          { y: 15, font: '10px sans-serif', color: '#8e44ad' },
+    RewardCreated:             { y: 15, font: '10px sans-serif', color: '#9b59b6' },
+    RewardUpdated:             { y: 15, font: '10px sans-serif', color: '#71368a' },
+    RewardDeleted:             { y: 15, font: '10px sans-serif', color: '#5e3370' },
+    CommunityGoalContribution: { y: 15, font: '10px sans-serif', color: '#2ecc71' },
+    CommunityGoalEnded:        { y: 15, font: '10px sans-serif', color: '#27ae60' },
+    PollCreated:               { y: 15, font: '10px sans-serif', color: '#3498db' },
+    PollUpdated:               { y: 15, font: '10px sans-serif', color: '#2980b9' },
+    PollEnded:                 { y: 15, font: '10px sans-serif', color: '#1f618d' },
+    TimedAction:               { y: 15, font: '10px sans-serif', color: '#95a5a6' },
+    default:                   { y: 12, font: '10px sans-serif', color: '#ffffff' }
+  };
+
 // === 1-bis) Configuration des filtres d'événements ===
 const filterConfig = {};
 // initialise tous les types à visible=true
@@ -120,34 +150,7 @@ else if (event.source === 'General') {
     handleCustomEvent({ type, ...data, time: now });
   });
 
-  // === labelConfig: per-type label positions & styles ===
-  const labelConfig = {
-    tts:   { y: 20, font: '10px sans-serif', color: '#ffef61' },
-    chat:  { y: 12, font: '10px sans-serif', color: 'rgba(57,195,255,1)' },
-    Follow:                    { y: 15, font: '10px sans-serif', color: '#a7ff8e' },
-    Raid:                      { y: 15, font: '10px sans-serif', color: '#ffae42' },
-    AdRun:                     { y: 15, font: '10px sans-serif', color: '#ffaa00' },
-    Sub:                       { y: 15, font: '10px sans-serif', color: '#ff41b0' },
-    ReSub:                     { y: 15, font: '10px sans-serif', color: '#28e7d7' },
-    GiftSub:                   { y: 15, font: '10px sans-serif', color: '#ff71ce' },
-    GiftBomb:                  { y: 15, font: '10px sans-serif', color: '#ff1f8b' },
-    Cheer:                     { y: 15, font: '10px sans-serif', color: '#ffd256' },
-    HypeTrainStart:            { y: 15, font: '10px sans-serif', color: '#ff6b6b' },
-    HypeTrainUpdate:           { y: 15, font: '10px sans-serif', color: '#ff5252' },
-    HypeTrainLevelUp:          { y: 15, font: '10px sans-serif', color: '#ff3b3b' },
-    HypeTrainEnd:              { y: 15, font: '10px sans-serif', color: '#ff2424' },
-    RewardRedemption:          { y: 15, font: '10px sans-serif', color: '#8e44ad' },
-    RewardCreated:             { y: 15, font: '10px sans-serif', color: '#9b59b6' },
-    RewardUpdated:             { y: 15, font: '10px sans-serif', color: '#71368a' },
-    RewardDeleted:             { y: 15, font: '10px sans-serif', color: '#5e3370' },
-    CommunityGoalContribution: { y: 15, font: '10px sans-serif', color: '#2ecc71' },
-    CommunityGoalEnded:        { y: 15, font: '10px sans-serif', color: '#27ae60' },
-    PollCreated:               { y: 15, font: '10px sans-serif', color: '#3498db' },
-    PollUpdated:               { y: 15, font: '10px sans-serif', color: '#2980b9' },
-    PollEnded:                 { y: 15, font: '10px sans-serif', color: '#1f618d' },
-    TimedAction:               { y: 15, font: '10px sans-serif', color: '#95a5a6' },
-    default:                   { y: 12, font: '10px sans-serif', color: '#ffffff' }
-  };
+
 
   // === 4) Resize canvas ===
   function resizeOscillo() {
