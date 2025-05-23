@@ -24,7 +24,6 @@ html, body {
 body {
     width: 100vw;
     min-height: 100vh;
-    margin: 0;
     overflow: hidden;
 }
 
@@ -97,7 +96,6 @@ body {
     background: #555;
     border-radius: 3px;
 }
-
 .event-filters button {
     flex: 0 0 auto;
     padding: 4px 10px;
@@ -116,7 +114,7 @@ body {
     transform: scale(1.05);
 }
 
-/* Définition des couleurs par type via data-type */
+/* Couleurs par type via data-type */
 .event-filters button[data-type="chat"]              { --filter-bg: rgba(57,195,255,0.4); --filter-color: #111; }
 .event-filters button[data-type="tts"]               { --filter-bg: #ffef61;              --filter-color: #111; }
 .event-filters button[data-type="Follow"]            { --filter-bg: #a7ff8e;              --filter-color: #111; }
@@ -160,6 +158,7 @@ body {
     box-sizing: border-box;
     border: 2px solid #262b2f;
     transition: box-shadow .2s, border-color .2s, opacity .25s;
+    position: relative;
 }
 #tts-panel.twitch-tts-glow { border-color: #ffee90; }
 #tts-panel.twitch-tts-glow::after {
@@ -277,32 +276,50 @@ body {
 @keyframes showEventFeed { 0%{opacity:0;transform:translateY(-18px) scaleY(.7);}100%{opacity:1;transform:none}}
 .event-feed.show { display:block; }
 
+/* ================================
+   SPLIT CHAT & TTS-INFO
+   ================================ */
 .chat-section {
-    flex:1; display:flex; flex-direction:column;
+    flex:1;
+    display: flex;
+    gap: 16px;
     background: var(--panel);
-    border-radius:0 0 16px 16px;
-    padding:0 18px 16px;
-    min-height:0;
+    border-radius: 0 0 16px 16px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.chat-container {
+    flex: 2;
+    background: var(--chatbg);
+    border-radius: 10px;
+    padding: 8px 12px;
+    overflow-y: auto;
+    box-shadow: 0 0 10px #0003;
 }
 #chat-log {
-    flex:1; overflow-y:auto;
-    padding:8px 12px;
-    background: var(--chatbg);
-    box-shadow:0 0 10px #0003;
-    border-radius:10px;
-    font-size:1rem; line-height:1.3;
-    white-space:pre-wrap;
-    min-height:0;
+    white-space: pre-wrap;
+    line-height: 1.3;
+    font-size: 1rem;
 }
-.chat-msg { margin:0 0 4px 0; }
-.chat-msg .chat-usr {
-    display:block; margin:0; padding:0;
-    color: var(--highlight);
-    font-weight:bold;
-}
-.chat-msg .chat-text {
-    display:block; margin:0; padding:0;
+.tts-info-container {
+    flex: 1;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: 0 0 10px #0003;
     color: var(--text);
+    font-size: 0.95rem;
+}
+.tts-info-container h2 {
+    margin-top: 0;
+    color: var(--accent);
+    font-size: 1.2rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+}
+#tts-info p {
+    margin: 8px 0;
+    line-height: 1.4;
 }
 
 /* ================================
@@ -317,4 +334,12 @@ body {
     #oscilloscope { min-width:99vw; }
     #tts-header, #tts-progress { max-width:99vw; }
     .header-bar h1 { font-size:1.2rem; }
+    .chat-section {
+        flex-direction: column;
+    }
+    .chat-container,
+    .tts-info-container {
+        flex: none;
+        width: 100%;
+    }
 }
