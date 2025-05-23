@@ -10,6 +10,9 @@
     --event-feed-border: #35bcff;
 }
 
+/* ================================
+   GLOBAL
+   ================================ */
 html, body {
     height: 100%;
     margin: 0;
@@ -18,7 +21,6 @@ html, body {
     color: var(--text);
     font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
 }
-
 body {
     width: 100vw;
     min-height: 100vh;
@@ -26,14 +28,15 @@ body {
     overflow: hidden;
 }
 
-/* HEADER BAR INLINE */
+/* ================================
+   HEADER
+   ================================ */
 .header-bar {
     display: flex;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 14px;
-    margin-top: 6px;
+    margin: 6px 0 14px 0;
     width: 100%;
 }
 .header-bar h1 {
@@ -43,17 +46,12 @@ body {
     letter-spacing: 1px;
     white-space: nowrap;
 }
-
 #status-dot {
-    width: 14px;
-    height: 14px;
+    width: 14px; height: 14px;
     border-radius: 50%;
     background: #eb4444;
-    display: inline-block;
-    vertical-align: middle;
     box-shadow: 0 0 4px #c40;
-    margin: 0 4px;
-    transition: background 0.2s;
+    transition: background .2s;
 }
 #status-dot.online { background: #41ff79; }
 #status-dot.offline { background: #eb4444; }
@@ -67,43 +65,91 @@ body {
     gap: 18px;
     font-size: 1.08rem;
     color: var(--highlight);
-    margin: 0 16px 0 0;
+    margin-right: 16px;
 }
 .header-bar button,
 .header-bar .file-btn {
-    margin: 0 7px 0 0;
+    margin-right: 7px;
 }
 .file-btn { cursor: pointer; }
-.header-bar > * {
-    vertical-align: middle;
-}
+.header-bar > * { vertical-align: middle; }
+
+/* ================================
+   FILTRES D’ÉVÉNEMENTS (PILLS)
+   ================================ */
 .event-filters {
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
-  padding: 4px;
-  background: #16181c;
-  border-bottom: 1px solid #233;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    overflow-x: auto;
+    padding: 6px 10px;
+    background: #16181c;
+    border-bottom: 1px solid #333;
+    box-shadow: 0 2px 8px #0006;
 }
-.event-filters button {
-  margin-right: 6px;
-  border: none;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+.event-filters::-webkit-scrollbar {
+    height: 6px;
 }
-.event-filters button.active {
-  opacity: 1;
+.event-filters::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
 }
 
-/* TTS PANEL ALIGNÉ */
+.event-filters button {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    font-size: 12px;
+    line-height: 1;
+    border: none;
+    border-radius: 12px;
+    background: var(--filter-bg, #444);
+    color: var(--filter-color, #fff);
+    cursor: pointer;
+    transition: transform .1s, opacity .2s;
+    opacity: .8;
+}
+.event-filters button.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Définition des couleurs par type via data-type */
+.event-filters button[data-type="chat"]              { --filter-bg: rgba(57,195,255,0.4); --filter-color: #111; }
+.event-filters button[data-type="tts"]               { --filter-bg: #ffef61;              --filter-color: #111; }
+.event-filters button[data-type="Follow"]            { --filter-bg: #a7ff8e;              --filter-color: #111; }
+.event-filters button[data-type="Raid"]              { --filter-bg: #ffae42;              --filter-color: #111; }
+.event-filters button[data-type="AdRun"]             { --filter-bg: #ffaa00;              --filter-color: #111; }
+.event-filters button[data-type="Sub"]               { --filter-bg: #ff41b0;              --filter-color: #111; }
+.event-filters button[data-type="ReSub"]             { --filter-bg: #28e7d7;              --filter-color: #111; }
+.event-filters button[data-type="GiftSub"]           { --filter-bg: #ff71ce;              --filter-color: #111; }
+.event-filters button[data-type="GiftBomb"]          { --filter-bg: #ff1f8b;              --filter-color: #fff; }
+.event-filters button[data-type="Cheer"]             { --filter-bg: #ffd256;              --filter-color: #111; }
+.event-filters button[data-type="HypeTrainStart"]    { --filter-bg: #ff6b6b;              --filter-color: #111; }
+.event-filters button[data-type="HypeTrainUpdate"]   { --filter-bg: #ff5252;              --filter-color: #fff; }
+.event-filters button[data-type="HypeTrainLevelUp"]  { --filter-bg: #ff3b3b;              --filter-color: #fff; }
+.event-filters button[data-type="HypeTrainEnd"]      { --filter-bg: #ff2424;              --filter-color: #fff; }
+.event-filters button[data-type="RewardRedemption"]  { --filter-bg: #8e44ad;              --filter-color: #fff; }
+.event-filters button[data-type="RewardCreated"]     { --filter-bg: #9b59b6;              --filter-color: #fff; }
+.event-filters button[data-type="RewardUpdated"]     { --filter-bg: #71368a;              --filter-color: #fff; }
+.event-filters button[data-type="RewardDeleted"]     { --filter-bg: #5e3370;              --filter-color: #fff; }
+.event-filters button[data-type="CommunityGoalContribution"] { --filter-bg: #2ecc71;       --filter-color: #111; }
+.event-filters button[data-type="CommunityGoalEnded"]        { --filter-bg: #27ae60;       --filter-color: #111; }
+.event-filters button[data-type="PollCreated"]      { --filter-bg: #3498db;              --filter-color: #fff; }
+.event-filters button[data-type="PollUpdated"]      { --filter-bg: #2980b9;              --filter-color: #fff; }
+.event-filters button[data-type="PollEnded"]        { --filter-bg: #1f618d;              --filter-color: #fff; }
+.event-filters button[data-type="TimedAction"]      { --filter-bg: #95a5a6;              --filter-color: #111; }
+
+/* ================================
+   TTS PANEL
+   ================================ */
 #tts-panel {
     width: 95vw;
     max-width: 1550px;
-    margin: 0 auto 12px auto;
-    padding: 18px 26px 14px 26px;
+    margin: 0 auto 12px;
+    padding: 18px 26px 14px;
     background: var(--panel);
     border-radius: 16px;
     box-shadow: 0 2px 24px #0003;
@@ -112,28 +158,20 @@ body {
     align-items: stretch;
     min-height: 52px;
     box-sizing: border-box;
-    border: 2px solid #262b2f; /* Bordure neutre par défaut */
-    transition: box-shadow 0.2s, border-color 0.2s, opacity 0.25s;
+    border: 2px solid #262b2f;
+    transition: box-shadow .2s, border-color .2s, opacity .25s;
 }
-#tts-panel.twitch-tts-glow {
-    border: 2px solid #ffee90;
-    }
-/* Halo animé avec ::after */
+#tts-panel.twitch-tts-glow { border-color: #ffee90; }
 #tts-panel.twitch-tts-glow::after {
     content: '';
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     border-radius: 16px;
     box-shadow: 0 0 0 6px #ffef61cc;
-    opacity: 1;
     animation: tts-glow-fade 3s linear forwards;
-    z-index: 2;
+    pointer-events: none;
 }
-@keyframes tts-glow-fade {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
+@keyframes tts-glow-fade { from{opacity:1} to{opacity:0}}
+
 #tts-header {
     background: #232b2e;
     color: #ffef61;
@@ -141,24 +179,17 @@ body {
     font-weight: bold;
     border: 2px solid #262b2f;
     border-radius: 12px 12px 0 0;
-    padding: 18px 34px 12px 34px;
-    width: 100%;
-    max-width: 98vw;
-    min-width: 300px;
-    margin-left: 0;
-    margin-right: 0;
-    text-align: left;
+    padding: 18px 34px 12px;
+    width: 100%; max-width: 98vw; min-width: 300px;
     box-sizing: border-box;
-    letter-spacing: 0.5px;
+    text-align: left;
+    letter-spacing: .5px;
     min-height: 38px;
     overflow: hidden;
     white-space: pre-wrap;
 }
-
 #tts-progress {
-    width: 100%;
-    max-width: 98vw;
-    min-width: 300px;
+    width: 100%; max-width: 98vw; min-width: 300px;
     height: 6px;
     background: #191d1c;
     border: 2px solid #55f77f;
@@ -166,53 +197,34 @@ body {
     border-radius: 0 0 12px 12px;
     box-sizing: border-box;
     overflow: hidden;
-    margin-left: 0;
-    margin-right: 0;
 }
 #tts-progress .bar {
     height: 100%;
-    background: linear-gradient(90deg, #41ff79 0%, #a5ffef 100%);
-    transition: width 0.3s cubic-bezier(.62,.01,.28,1);
+    background: linear-gradient(90deg,#41ff79 0%,#a5ffef 100%);
+    transition: width .3s cubic-bezier(.62,.01,.28,1);
 }
 
-/* Le panel principal */
+/* ================================
+   LAYOUT PRINCIPAL
+   ================================ */
 .dashboard-vertical {
-    width: 95vw;
-    max-width: 1550px;
+    width: 95vw; max-width: 1550px;
     margin: 0 auto;
-    padding: 0;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     height: 88vh;
 }
-
-/* --- TIMELINE CONTROL EN HAUT A DROITE, ALIGNÉ --- */
 .timeline-topbar {
     background: var(--panel);
     border-radius: 10px 10px 0 0;
     box-shadow: 0 2px 24px #0007;
-    margin-bottom: 2px;
-    padding: 6px 20px 2px 20px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    min-height: 44px;
-    width: 95vw;
-    max-width: 1550px;
-    margin-left: auto;
-    margin-right: auto;
+    display: flex; justify-content: flex-end; align-items: center;
+    padding: 6px 20px 2px; min-height: 44px;
+    width: 95vw; max-width: 1550px;
+    margin: 0 auto 2px auto;
     box-sizing: border-box;
 }
-
 .timeline-controls {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-bottom: 0;
-    margin-top: 0;
-    width: auto;
-    background: none;
+    display: flex; gap: 8px;
 }
 .timeline-controls button {
     padding: 4px 12px;
@@ -221,7 +233,7 @@ body {
     border: 1px solid #333;
     color: var(--highlight);
     cursor: pointer;
-    transition: background 0.12s;
+    transition: background .12s;
     font-size: 1rem;
 }
 .timeline-controls button.active,
@@ -230,127 +242,79 @@ body {
     color: #111;
     outline: none;
 }
-
 #oscilloscope {
-    width: 100% !important;
-    height: 100% !important;
+    width:100%!important; height:100%!important;
     background: #191b1d;
     border-radius: 10px;
     box-shadow: 0 2px 24px #0007;
-    display: block;
-    min-width: 0;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
+    display:block;
+    margin:0; padding:0;
 }
 
+/* ================================
+   MAIN / CHAT / EVENT-FEED
+   ================================ */
 .dashboard-main {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-    gap: 0;
+    flex:1; display:flex; flex-direction:column; gap:0; height:100%; min-height:0;
 }
-
 .timeline-section {
-    flex: 1 1 50%;
-    min-height: 0;
-    max-height: 50%;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    margin: 0;
-    height: 50%;
+    flex:1; display:flex; flex-direction:column; padding:0; margin:0; min-height:0; max-height:50%;
 }
-
-
-
-/* ... Le reste du CSS inchangé ... */
-
 .event-feed {
-    display: none;
+    display:none;
     background: var(--event-feed-bg);
     color: #44f8ff;
-    font-size: 1.12rem;
-    border-left: 5px solid var(--event-feed-border);
-    margin-bottom: 0;
-    padding: 13px 28px 13px 23px;
-    animation: showEventFeed 0.4s cubic-bezier(.8,0,.3,1) both;
-    min-height: 35px;
-    max-width: 97%;
-    border-radius: 0 0 10px 10px;
-    box-shadow: 0 2px 12px #27d3ff33;
-    margin-left: 14px;
-    margin-right: 14px;
+    font-size:1.12rem;
+    border-left:5px solid var(--event-feed-border);
+    padding:13px 28px 13px 23px;
+    animation: showEventFeed .4s cubic-bezier(.8,0,.3,1) both;
+    min-height:35px;
+    max-width:97%;
+    border-radius:0 0 10px 10px;
+    box-shadow:0 2px 12px #27d3ff33;
+    margin:0 14px;
 }
-@keyframes showEventFeed {
-    0% { opacity: 0; transform: translateY(-18px) scaleY(0.7);}
-    100% { opacity: 1; transform: none;}
-}
+@keyframes showEventFeed { 0%{opacity:0;transform:translateY(-18px) scaleY(.7);}100%{opacity:1;transform:none}}
+.event-feed.show { display:block; }
 
-.event-feed.show {
-    display: block;
-}
-/*___________________________________CHAT_______________________________ */
 .chat-section {
-  flex: 1 1 50%;            /* occupe 50% de la colonne */
-  display: flex;            /* <--- */
-  flex-direction: column;   /* <--- */
-  background: var(--panel);
-  border-radius: 0 0 16px 16px;
-  padding: 0 18px 16px;
-  min-height: 0;   
+    flex:1; display:flex; flex-direction:column;
+    background: var(--panel);
+    border-radius:0 0 16px 16px;
+    padding:0 18px 16px;
+    min-height:0;
 }
-
 #chat-log {
-  flex: 1;                  /* <--- prend tout l'espace restant */
-  overflow-y: auto;         /* <--- barre de scroll quand c'est plein */
-  padding: 8px 12px;
-  background: var(--chatbg);
-  box-shadow: 0 0 10px #0003;
-  border-radius: 10px;
-box-shadow: 0 0 10px #0003;
-  font-size: 1rem;
-  line-height: 1.3;
-  white-space: pre-wrap;
-  min-height: 0; 
+    flex:1; overflow-y:auto;
+    padding:8px 12px;
+    background: var(--chatbg);
+    box-shadow:0 0 10px #0003;
+    border-radius:10px;
+    font-size:1rem; line-height:1.3;
+    white-space:pre-wrap;
+    min-height:0;
 }
-
-/* Chaque bloc pseudo+message */
-.chat-msg {
-  margin: 0 0 4px;    /* 4px sous chaque bloc */
-}
-
-/* Pseudo sur sa ligne, sans marge */
+.chat-msg { margin:0 0 4px 0; }
 .chat-msg .chat-usr {
-  display: block;
-  margin: 0;
-  padding: 0;
-  color: var(--highlight);
-  font-weight: bold;
+    display:block; margin:0; padding:0;
+    color: var(--highlight);
+    font-weight:bold;
 }
-
-/* Message immédiatement sous le pseudo, sans marge */
 .chat-msg .chat-text {
-  display: block;
-  margin: 0;
-  padding: 0;
-  color: var(--text);
+    display:block; margin:0; padding:0;
+    color: var(--text);
 }
 
-
-
-@media (max-width: 900px) {
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width:900px) {
     .dashboard-vertical,
     #tts-panel,
     .timeline-topbar {
-        max-width: 99vw;
-        width: 99vw;
+        width:99vw; max-width:99vw;
     }
-    #oscilloscope { min-width: 99vw; }
-    #tts-header, #tts-progress { max-width: 99vw; }
-    .header-bar h1 {
-        font-size: 1.2rem;
-    }
+    #oscilloscope { min-width:99vw; }
+    #tts-header, #tts-progress { max-width:99vw; }
+    .header-bar h1 { font-size:1.2rem; }
 }
