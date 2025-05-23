@@ -205,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const { color, width } = getStyleFor(ev.type);
 
-      // barre
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth   = width;
@@ -214,13 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.lineTo(rawX,H-5);
       ctx.stroke();
 
-      // icône
       ctx.beginPath();
       drawIcon(ev.type, ctx, rawX, H);
       ctx.fillStyle = color;
       ctx.fill();
 
-      // label
       if (filterConfig[ev.type].labels) {
         drawLabel(ev, ctx, rawX, idx);
       }
@@ -242,11 +239,14 @@ document.addEventListener('DOMContentLoaded', () => {
       adaptTimeline();
     }
   }
+
   function adaptTimeline() {
     if (!chatBuffer.length || timelineMode!=='adapt') return;
-    const t0 = Number(new Date(chatBuffer[0].time));
-    smoothie.options.millisPerPixel = Math.max((Date.now()-t0)/oscillo.width, 10);
+    const t0       = Number(new Date(chatBuffer[0].time));
+    const duration = Date.now() - t0;
+    smoothie.options.millisPerPixel = Math.max(Math.floor(duration/oscillo.width), 10);
   }
+
   setTimelineWindow('scale',60);
   setInterval(adaptTimeline,1500);
   timelineBtns.forEach(btn=>
@@ -357,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // --- NOUVELLE PARTIE : remplir le panneau Détails TTS ---
       ttsInfoDiv.innerHTML = '';  // on efface
       if (Array.isArray(payload.candidatesPanel)) {
-        // trouver la ligne correspondant à l'utilisateur sélectionné
         const entry = payload.candidatesPanel.find(e => e.user === ttsUser);
         if (entry) {
           const ul = document.createElement('ul');
@@ -372,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ttsInfoDiv.appendChild(ul);
         }
       } else {
-        // cas fallback
         ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
       }
 
