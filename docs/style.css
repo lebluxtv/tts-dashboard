@@ -222,17 +222,18 @@ body {
     box-sizing: border-box;
 }
 .timeline-controls {
-    display: flex; gap: 8px;
+    display: flex; gap: 6px;
 }
+/* boutons plus compacts pour mieux rentrer */
 .timeline-controls button {
-    padding: 4px 12px;
+    padding: 2px 8px;
     border-radius: 8px;
     background: #20232a;
     border: 1px solid #333;
     color: var(--highlight);
     cursor: pointer;
     transition: background .12s;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 .timeline-controls button.active,
 .timeline-controls button:focus {
@@ -240,6 +241,7 @@ body {
     color: #111;
     outline: none;
 }
+
 #oscilloscope {
     width:100%!important; height:100%!important;
     background: #191b1d;
@@ -282,26 +284,17 @@ body {
     flex: 1;
     display: flex;
     gap: 12px;
-    margin: 0 14px 14px;
-    min-height: 0;
+    margin: 12px 14px 14px;    /* <-- décalage vers le bas pour ne plus chevaucher */
 }
 .chat-container {
     flex: 1;
     background: var(--chatbg);
     border-radius: 10px;
     box-shadow: 0 0 10px #0003;
-    overflow-y: scroll;       /* scrollbar toujours visible */
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    overflow-y: auto;
 }
 .chat-container #chat-log {
-    flex: 1;
     padding: 8px 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* colle toujours au bas */
-    overflow-y: auto;          /* contenu scrollable */
 }
 .tts-info-container {
     flex: 1;
@@ -311,7 +304,6 @@ body {
     box-shadow: 0 2px 12px #0007;
     color: var(--text);
     overflow-y: auto;
-    min-height: 0;
 }
 .tts-info-container h2 {
     margin: 0 0 8px;
@@ -327,15 +319,17 @@ body {
     margin-bottom: 4px;
     line-height: 1.3;
 }
-/* 1) Pseudos normaux = couleur identique au titre */
+
+/* ================================
+   CHAT – couleur des pseudos
+   ================================ */
 .chat-msg .chat-usr {
   color: var(--highlight) !important;
 }
-
-/* 2) Pseudos TTS = couleur accent (jaune) */
 .chat-msg.chat-tts .chat-usr {
   color: var(--accent) !important;
 }
+
 /* ================================
    RESPONSIVE
    ================================ */
@@ -350,6 +344,6 @@ body {
     .header-bar h1 { font-size:1.2rem; }
     .chat-tts-section {
         flex-direction: column;
-        margin: 0 7px 7px;
+        margin: 12px 7px 7px;
     }
 }
