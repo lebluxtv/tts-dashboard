@@ -1,0 +1,27 @@
+# Ignore VS/IDE files
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Ignore node/npm logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Ignore Mac system files
+.DS_Store
+
+# Ignore build output
+/dist
+/build
+
+# Ignore everything except docs folder content
+!.gitignore
+docs/*.html
+docs/*.js
+docs/*.css
+
+# Re-ignore VSCode/other editor folders if needed
+.vscode/
+.idea/
