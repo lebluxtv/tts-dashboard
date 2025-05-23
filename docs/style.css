@@ -464,8 +464,11 @@ body {
     margin: 60px 14px 14px;
 }
 
+/* Ajoute ceci dans ton CSS */
 .chat-container {
-    flex: 1;
+    height: 350px; /* taille fixe, à ajuster selon ton interface */
+    min-height: 200px;
+    max-height: 400px;
     display: flex;
     flex-direction: column;
     background: var(--chatbg);
@@ -474,11 +477,13 @@ body {
     overflow: hidden;
 }
 
-    .chat-container #chat-log {
-        flex: 1;
-        overflow-y: auto;
-        padding: 8px 12px;
-    }
+#chat-log {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 12px;
+    height: 100%; /* pour prendre toute la place dispo */
+    max-height: 100%; /* bloque à la hauteur du parent */
+}
 
 .tts-info-container {
     flex: 1;
