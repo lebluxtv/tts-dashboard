@@ -264,7 +264,7 @@ timestampFormatter: date => {
 
   // === 6) onDraw ===
   smoothie.options.onDraw = function({ chart, chartWidth:W, chartHeight:H, options }) {
-    const now = Date.now();
+    const now = chart.currentValueTime || Date.now();
     const mpp = options.millisPerPixel;
     const ctx = chart.canvas.getContext('2d');
     const tol = 5;
