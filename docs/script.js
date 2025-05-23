@@ -337,17 +337,19 @@ document.addEventListener('DOMContentLoaded', () => {
       renderChat();
       return;
     }
-    if (type==='tts') {
-      setTtsHeader(payload.user,payload.message);
-      ttsPanel.classList.add('twitch-tts-glow');
-      setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
-      chatBuffer.push({ time,user:payload.user,message:payload.message,eligible:true,isTTS:true });
-      if(chatBuffer.length>maxChat) chatBuffer.shift();
-      renderChat();
-      eventsBuffer.push({ type,time,...payload });
-      if(eventsBuffer.length>1000) eventsBuffer.shift();
-      return;
-    }
+if (type === 'tts') {
+   // on prend user OU selectedUser pour le widget tts-reader-selection
+   const ttsUser = payload.user ?? payload.selectedUser;
+   setTtsHeader(ttsUser, payload.message);
+    ttsPanel.classList.add('twitch-tts-glow');
+    setTimeout(()=>ttsPanel.classList.remove('twitch-tts-glow'),3000);
+   chatBuffer.push({ time, user:ttsUser, message:payload.message, eligible:true, isTTS:true });
+    if (chatBuffer.length>maxChat) chatBuffer.shift();
+    renderChat();
+    eventsBuffer.push({ type, time, ...payload });
+    if (eventsBuffer.length>1000) eventsBuffer.shift();
+    return;
+  }
     if (type==='tick') {
       eventsBuffer.push({ type,time,...payload });
       if(eventsBuffer.length>1000) eventsBuffer.shift();
