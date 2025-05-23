@@ -463,6 +463,7 @@ body {
     gap: 12px;
     margin: 60px 14px 14px;
     min-height: 0; /* très important pour un layout full height */
+    height: 100%;
 }
 
 .chat-container {
@@ -474,6 +475,7 @@ body {
     box-shadow: 0 0 10px #0003;
     overflow: hidden;
     min-height: 0; /* permet au flex de ne pas forcer la hauteur */
+    height: 100%;
 }
 
 #chat-log {
@@ -483,6 +485,7 @@ body {
     height: 100%;
     min-height: 0; /* force à rester dans le parent flex */
     max-height: 100%;
+    height: 100%;
     box-sizing: border-box;
 }
 
