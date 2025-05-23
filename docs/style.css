@@ -77,6 +77,26 @@ body {
 .header-bar > * {
     vertical-align: middle;
 }
+.event-filters {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: 4px;
+  background: #16181c;
+  border-bottom: 1px solid #233;
+}
+.event-filters button {
+  margin-right: 6px;
+  border: none;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.event-filters button.active {
+  opacity: 1;
+}
 
 /* TTS PANEL ALIGNÉ */
 #tts-panel {
