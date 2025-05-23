@@ -19,33 +19,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let timelineMode     = 'scale';
   let lastScaleSeconds = 60;
 
-  // === labelConfig: position & style des labels selon type ===
+  // === 1) labelConfig: position & style des labels selon type ===
   const labelConfig = {
     tts:   { y:20, font:'10px sans-serif', color:'#ffef61' },
     chat:  { y:12, font:'10px sans-serif', color:'rgba(57,195,255,1)' },
-    Follow:                    { y:15,font:'10px sans-serif',color:'#a7ff8e' },
-    Raid:                      { y:15,font:'10px sans-serif',color:'#ffae42' },
-    AdRun:                     { y:15,font:'10px sans-serif',color:'#ffaa00' },
-    Sub:                       { y:15,font:'10px sans-serif',color:'#ff41b0' },
-    ReSub:                     { y:15,font:'10px sans-serif',color:'#28e7d7' },
-    GiftSub:                   { y:15,font:'10px sans-serif',color:'#ff71ce' },
-    GiftBomb:                  { y:15,font:'10px sans-serif',color:'#ff1f8b' },
-    Cheer:                     { y:15,font:'10px sans-serif',color:'#ffd256' },
-    HypeTrainStart:            { y:15,font:'10px sans-serif',color:'#ff6b6b' },
-    HypeTrainUpdate:           { y:15,font:'10px sans-serif',color:'#ff5252' },
-    HypeTrainLevelUp:          { y:15,font:'10px sans-serif',color:'#ff3b3b' },
-    HypeTrainEnd:              { y:15,font:'10px sans-serif',color:'#ff2424' },
-    RewardRedemption:          { y:15,font:'10px sans-serif',color:'#8e44ad' },
-    RewardCreated:             { y:15,font:'10px sans-serif',color:'#9b59b6' },
-    RewardUpdated:             { y:15,font:'10px sans-serif',color:'#71368a' },
-    RewardDeleted:             { y:15,font:'10px sans-serif',color:'#5e3370' },
-    CommunityGoalContribution: { y:15,font:'10px sans-serif',color:'#2ecc71' },
-    CommunityGoalEnded:        { y:15,font:'10px sans-serif',color:'#27ae60' },
-    PollCreated:               { y:15,font:'10px sans-serif',color:'#3498db' },
-    PollUpdated:               { y:15,font:'10px sans-serif',color:'#2980b9' },
-    PollEnded:                 { y:15,font:'10px sans-serif',color:'#1f618d' },
-    TimedAction:               { y:15,font:'10px sans-serif',color:'#95a5a6' },
-    default:                   { y:12,font:'10px sans-serif',color:'#ffffff' }
+    Follow:                    { y:15, font:'10px sans-serif', color:'#a7ff8e' },
+    Raid:                      { y:15, font:'10px sans-serif', color:'#ffae42' },
+    AdRun:                     { y:15, font:'10px sans-serif', color:'#ffaa00' },
+    Sub:                       { y:15, font:'10px sans-serif', color:'#ff41b0' },
+    ReSub:                     { y:15, font:'10px sans-serif', color:'#28e7d7' },
+    GiftSub:                   { y:15, font:'10px sans-serif', color:'#ff71ce' },
+    GiftBomb:                  { y:15, font:'10px sans-serif', color:'#ff1f8b' },
+    Cheer:                     { y:15, font:'10px sans-serif', color:'#ffd256' },
+    HypeTrainStart:            { y:15, font:'10px sans-serif', color:'#ff6b6b' },
+    HypeTrainUpdate:           { y:15, font:'10px sans-serif', color:'#ff5252' },
+    HypeTrainLevelUp:          { y:15, font:'10px sans-serif', color:'#ff3b3b' },
+    HypeTrainEnd:              { y:15, font:'10px sans-serif', color:'#ff2424' },
+    RewardRedemption:          { y:15, font:'10px sans-serif', color:'#8e44ad' },
+    RewardCreated:             { y:15, font:'10px sans-serif', color:'#9b59b6' },
+    RewardUpdated:             { y:15, font:'10px sans-serif', color:'#71368a' },
+    RewardDeleted:             { y:15, font:'10px sans-serif', color:'#5e3370' },
+    CommunityGoalContribution: { y:15, font:'10px sans-serif', color:'#2ecc71' },
+    CommunityGoalEnded:        { y:15, font:'10px sans-serif', color:'#27ae60' },
+    PollCreated:               { y:15, font:'10px sans-serif', color:'#3498db' },
+    PollUpdated:               { y:15, font:'10px sans-serif', color:'#2980b9' },
+    PollEnded:                 { y:15, font:'10px sans-serif', color:'#1f618d' },
+    TimedAction:               { y:15, font:'10px sans-serif', color:'#95a5a6' },
+    default:                   { y:12, font:'10px sans-serif', color:'#ffffff' }
   };
 
   // === 1-bis) Configuration des filtres & injection des “pills” ===
@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   const filtersDiv = document.getElementById('event-filters');
   Object.entries(labelConfig).forEach(([type,cfg]) => {
-    if (type==='default') return;
+    if (type === 'default') return;
     const btn = document.createElement('button');
-    btn.textContent = type;
-    btn.dataset.type = type;        // pour le CSS coloré
-    btn.style.color  = cfg.color;   // fallback si pas de CSS
+    btn.textContent   = type;
+    btn.dataset.type  = type;        // pour un style éventuel en CSS
+    btn.style.color   = cfg.color;   // fallback si pas de CSS
     btn.classList.add('active');
     btn.onclick = () => {
       filterConfig[type].visible = !filterConfig[type].visible;
@@ -68,7 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.oncontextmenu = e => {
       e.preventDefault();
       filterConfig[type].labels = !filterConfig[type].labels;
-      btn.style.opacity = filterConfig[type].labels ? (filterConfig[type].visible ? '1' : '0.8') : '0.4';
+      btn.style.opacity = filterConfig[type].labels
+        ? (filterConfig[type].visible ? '1' : '0.8')
+        : '0.4';
     };
     btn.title = 'clic gauche: toggle barre · clic droit: toggle label';
     filtersDiv.appendChild(btn);
@@ -83,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const resp = await client.getActiveViewers();
         const n = resp.viewers.length;
-        viewerCountSpan.textContent = n? `👀 ${n}` : '';
+        viewerCountSpan.textContent = n ? `👀 ${n}` : '';
         viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
       } catch {
         viewerCountSpan.textContent = '';
@@ -101,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   client.on('*', ({ event, data }) => {
     let type = null;
     const now = Date.now();
+
     if (event.source === 'Twitch') {
       switch(event.type) {
         case 'Whisper': type='chat'; break;
@@ -173,9 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlaps = {};
 
     eventsBuffer.forEach(ev => {
-      if (!filterConfig[ev.type]?.visible) return;           // 1) visiblité
+      if (!filterConfig[ev.type]?.visible) return;           // 1) visibilité
       const rawX = W - (now - ev.time)/mpp;
-      if (rawX<0 || rawX>W) return;
+      if (rawX < 0 || rawX > W) return;
 
       // 2) collision offset (optionnel chat)
       let bucketX, idx;
@@ -373,37 +376,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawIcon(type, ctx, x, H) {
-    if (type==='tts')     ctx.arc(x, H-18,  8, 0,2*Math.PI);
-    else if (type==='chat') ctx.arc(x, H-12, 4,0,2*Math.PI);
-    else if (type==='Follow')ctx.arc(x, H-18,6,0,2*Math.PI);
-    else                  ctx.rect(x-6, H-25,13,13);
+    if      (type==='tts')     ctx.arc(x, H-18,  8, 0,2*Math.PI);
+    else if (type==='chat')    ctx.arc(x, H-12, 4,0,2*Math.PI);
+    else if (type==='Follow')  ctx.arc(x, H-18,6,0,2*Math.PI);
+    else                       ctx.rect(x-6, H-25,13,13);
   }
 
   function drawLabel(ev, ctx, x, idx) {
-    const cfg = labelConfig[ev.type]||labelConfig.default;
+    const cfg = labelConfig[ev.type] || labelConfig.default;
     const lineHeight = parseInt(cfg.font,10)+2;
     const baseY = cfg.y + idx*lineHeight*2;
     ctx.font = cfg.font;
     ctx.textAlign = 'center';
     ctx.fillStyle = cfg.color;
 
-    // TimedAction : 2 lignes
     if (ev.type==='TimedAction' && ev.name) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.name, x, baseY+lineHeight);
     }
-    // Follow : 2 lignes
     else if (ev.type==='Follow' && ev.displayName) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(ev.displayName, x, baseY+lineHeight);
     }
-    // Cheer : 3 lignes
     else if (ev.type==='Cheer' && ev.message && ev.message.hasBits) {
       ctx.fillText(ev.type, x, baseY);
       ctx.fillText(`${ev.message.bits} bits`, x, baseY+lineHeight);
       ctx.fillText(ev.message.displayName, x, baseY+lineHeight*2);
     }
-    // Default
     else {
       ctx.fillText(ev.type, x, baseY);
     }
@@ -423,4 +422,5 @@ document.addEventListener('DOMContentLoaded', () => {
       viewerCountSpan.title = '';
     }
   },10000);
+
 });
