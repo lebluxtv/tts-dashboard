@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const ttsCandidatesPanel = document.getElementById('tts-candidates-panel');
 const ttsSwitchInput = document.getElementById('tts-switch');
 const ttsSwitchLabel = document.getElementById('tts-switch-label');
-
+const ttsSwitchLabelText = ttsSwitchLabel.querySelector('.switch-label-text');
 
   let chatBuffer    = [];
   let eventsBuffer  = [];
@@ -96,12 +96,13 @@ const ttsSwitchLabel = document.getElementById('tts-switch-label');
   });
 
 // === Switch TTS Auto Message Reader ===
-async function updateTtsSwitchUI(realValue) {
+function updateTtsSwitchUI(realValue) {
   if (typeof realValue !== "boolean") return;
   ttsSwitchInput.checked = realValue;
-  ttsSwitchLabel.querySelector('span').textContent = realValue ? 'Auto TTS ACTIVÉ' : 'Auto TTS DÉSACTIVÉ';
+  ttsSwitchLabelText.textContent = realValue ? 'TTS ACTIVÉ' : 'TTS DÉSACTIVÉ';
   ttsSwitchLabel.style.opacity = realValue ? '1' : '0.5';
 }
+
 
 async function syncTtsSwitchFromBackend() {
   try {
