@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ttsTimerInput    = document.getElementById('tts-timer');
   const ttsTimerLabel    = document.getElementById('tts-timer-label');
 const ttsCandidatesPanel = document.getElementById('tts-candidates-panel');
+const ttsSwitchInput = document.getElementById('tts-switch');
+const ttsSwitchLabel = document.getElementById('tts-switch-label');
 
 
   let chatBuffer    = [];
@@ -93,6 +95,43 @@ const ttsCandidatesPanel = document.getElementById('tts-candidates-panel');
     filtersDiv.appendChild(btn);
   });
 
+// === Switch TTS Auto Message Reader ===
+async function updateTtsSwitchUI(realValue) {
+  if (typeof realValue !== "boolean") return;
+  ttsSwitchInput.checked = realValue;
+  ttsSwitchLabel.querySelector('span').textContent = realValue ? 'Auto TTS ACTIVÉ' : 'Auto TTS DÉSACTIVÉ';
+  ttsSwitchLabel.style.opacity = realValue ? '1' : '0.5';
+}
+
+async function syncTtsSwitchFromBackend() {
+  try {
+    const resp = await client.getGlobal("ttsAutoReaderEnabled");
+    let val = false;
+    if (resp && resp.status === "ok") {
+      val = !!resp.variable.value;
+    }
+    updateTtsSwitchUI(val);
+  } catch (e) {
+    updateTtsSwitchUI(false);
+    console.warn("Erreur récupération ttsAutoReaderEnabled:", e);
+  }
+}
+
+function setTtsAutoReader(enabled) {
+  const method = enabled ? "switchReaderOn" : "switchReaderOff";
+  client.doActionByName("TTS Auto Message Reader Switch ON / OFF", {}, method)
+    .then(() => updateTtsSwitchUI(enabled))
+    .catch(e => {
+      updateTtsSwitchUI(!enabled);
+      alert("Erreur lors du changement de l’état du TTS Auto Reader.");
+    });
+}
+
+ttsSwitchInput.addEventListener('change', (e) => {
+  setTtsAutoReader(ttsSwitchInput.checked);
+});
+
+
 // === 2) connexion Streamer.bot ===
 const client = new StreamerbotClient({
   host:'127.0.0.1', port:8080, endpoint:'/', password:'streamer.bot',
@@ -136,11 +175,13 @@ const client = new StreamerbotClient({
     } catch (e) {
       console.warn("Erreur récupération du cooldown ttsCooldownMinutes :", e);
     }
+syncTtsSwitchFromBackend();
   },
   onDisconnect: () => {
     statusDot.classList.replace('online','offline');
     viewerCountSpan.textContent = '';
     viewerCountSpan.title = '';
+
   }
 });
 
