@@ -383,6 +383,62 @@ height: 320px;
     margin-bottom: 4px;
     line-height: 1.3;
 }
+.tts-candidates-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 22px 0 0 0;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.tts-candidate {
+  width: 110px; min-width: 90px; max-width: 135px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 4px;
+}
+.tts-candidate.selected .tts-candidate-bar-inner {
+  background: linear-gradient(90deg, #ffe200, #00ffc8 80%);
+  box-shadow: 0 0 7px 0 #ffee80b8;
+}
+.tts-candidate-bar-outer {
+  width: 100%;
+  height: 24px;
+  background: #161c1a;
+  border: 1.3px solid #6cfcb2;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 7px;
+}
+.tts-candidate-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #36e29b 65%, #0ff8de 100%);
+  border-radius: 6px 0 0 6px;
+  transition: width .3s;
+}
+.tts-candidate-meta {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.93em;
+  margin-top: 2px;
+}
+.tts-candidate-user {
+  color: #ff6565;
+  font-weight: 600;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tts-candidate-msgs {
+  color: #c5fdff;
+}
+.tts-candidate-weight {
+  color: #ffe86d;
+  font-family: monospace;
+}
 
 /* ================================
    CHAT – couleur des pseudos
