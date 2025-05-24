@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const ttsInfoDiv       = document.getElementById('tts-info');
   const ttsTimerInput    = document.getElementById('tts-timer');
   const ttsTimerLabel    = document.getElementById('tts-timer-label');
+const ttsCandidatesPanel = document.getElementById('tts-candidates-panel');
+
 
   let chatBuffer    = [];
   let eventsBuffer  = [];
@@ -427,26 +429,30 @@ timestampFormatter: date => {
       eventsBuffer.push({ type,time,...payload });
       if (eventsBuffer.length>1000) eventsBuffer.shift();
 
-      // détails TTS
-      ttsInfoDiv.innerHTML = '';
-      if (Array.isArray(payload.candidatesPanel)){
-        const entry = payload.candidatesPanel.find(e=>e.user===ttsUser);
-        if (entry){
-          const ul = document.createElement('ul');
-          ul.innerHTML = `
-            <li><strong>Utilisateur :</strong> ${ttsUser}</li>
-            <li><strong>Messages :</strong> ${entry.messages}</li>
-            <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
-            <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
-            <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
-            <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
-          `;
-          ttsInfoDiv.appendChild(ul);
-        }
-      } else {
-        ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
-      }
-      return;
+// détails TTS
+ttsInfoDiv.innerHTML = '';
+if (Array.isArray(payload.candidatesPanel)){
+  const entry = payload.candidatesPanel.find(e=>e.user===ttsUser);
+  if (entry){
+    const ul = document.createElement('ul');
+    ul.innerHTML = `
+      <li><strong>Utilisateur :</strong> ${ttsUser}</li>
+      <li><strong>Messages :</strong> ${entry.messages}</li>
+      <li><strong>freshnessScore :</strong> ${entry.freshnessScore.toFixed(3)}</li>
+      <li><strong>activityScore :</strong> ${entry.activityScore.toFixed(3)}</li>
+      <li><strong>tokenBoost :</strong> ${entry.tokenBoost.toFixed(2)}</li>
+      <li><strong>weight :</strong> ${entry.weight.toFixed(3)}</li>
+    `;
+    ttsInfoDiv.appendChild(ul);
+  }
+  // Ajout du panel jauges (juste ici !)
+  renderCandidatesPanel(payload.candidatesPanel, ttsUser);
+} else {
+  ttsInfoDiv.textContent = 'Aucune donnée détaillée disponible.';
+  ttsCandidatesPanel.innerHTML = '';
+}
+return;
+
     }
 
     if (type==='tick'){
@@ -490,6 +496,35 @@ timestampFormatter: date => {
     }
     return { color, width };
   }
+function renderCandidatesPanel(candidates, selectedUser) {
+  if (!Array.isArray(candidates) || !candidates.length) {
+    ttsCandidatesPanel.innerHTML = '<p style="color:#888;text-align:center;margin-top:18px;">Aucun panel reçu.</p>';
+    return;
+  }
+
+  // Cherche le max weight pour la normalisation
+  const maxWeight = Math.max(...candidates.map(u => u.weight));
+  // Option : limiter à 15 candidats
+  const topCandidates = candidates.slice(0, 15);
+
+  ttsCandidatesPanel.innerHTML = `
+    <div class="tts-candidates-grid">
+      ${topCandidates.map(u => `
+        <div class="tts-candidate${u.user===selectedUser ? ' selected' : ''}">
+          <div class="tts-candidate-bar-outer">
+            <div class="tts-candidate-bar-inner"
+                 style="width:${(u.weight/maxWeight*100).toFixed(1)}%;"></div>
+          </div>
+          <div class="tts-candidate-meta">
+            <span class="tts-candidate-user">${u.user}</span>
+            <span class="tts-candidate-msgs">${u.messages} msg</span>
+            <span class="tts-candidate-weight">${u.weight.toFixed(3)}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
   function drawIcon(type, ctx, x, H){
     if (type==='tts')      ctx.arc(x,H-18, 8,0,2*Math.PI);
