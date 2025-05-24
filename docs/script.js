@@ -93,86 +93,100 @@ const ttsCandidatesPanel = document.getElementById('tts-candidates-panel');
     filtersDiv.appendChild(btn);
   });
 
-  // === 2) connexion Streamer.bot ===
-  const client = new StreamerbotClient({
-    host:'127.0.0.1', port:8080, endpoint:'/', password:'streamer.bot',
-    subscribe:'*',
-    onConnect: async () => {
-      statusDot.classList.replace('offline','online');
-      try {
-        const resp = await client.getActiveViewers();
-        const n = resp.viewers.length;
-        viewerCountSpan.textContent = n?`👀 ${n}`:'';
-        viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
-      } catch {
-        viewerCountSpan.textContent = '';
-        viewerCountSpan.title = '';
-      }
-      // === Récupération dynamique de l'ID de l'action TTS Timer Set ===
-      try {
-        const actionsObj = await client.getActions();
-        const ttsTimer = actionsObj.actions.find(a => a.name === "TTS Timer Set");
-        if (ttsTimer) {
-          TTS_TIMER_ACTION_ID = ttsTimer.id;
-          // Envoie la valeur actuelle au chargement (optionnel)
-          const val = Number(ttsTimerInput.value) || 3;
-          sendTtsTimer(val);
-        } else {
-          console.warn("Action TTS Timer Set non trouvée !");
-        }
-      } catch(e) {
-        console.warn("Erreur récupération actions :", e);
-      }
-    },
-    onDisconnect: () => {
-      statusDot.classList.replace('online','offline');
+// === 2) connexion Streamer.bot ===
+const client = new StreamerbotClient({
+  host:'127.0.0.1', port:8080, endpoint:'/', password:'streamer.bot',
+  subscribe:'*',
+  onConnect: async () => {
+    statusDot.classList.replace('offline','online');
+    try {
+      const resp = await client.getActiveViewers();
+      const n = resp.viewers.length;
+      viewerCountSpan.textContent = n?`👀 ${n}`:'';
+      viewerCountSpan.title = resp.viewers.map(v=>v.display).join(', ');
+    } catch {
       viewerCountSpan.textContent = '';
       viewerCountSpan.title = '';
     }
-  });
-
-  // === 2-bis) TTS Timer Control ===
-  function sendTtsTimer(timerValue) {
-    if (!TTS_TIMER_ACTION_ID) {
-      console.warn("TTS_TIMER_ACTION_ID non chargé !");
-      return; // Attend que l'id soit chargé
-    }
-    if (timerValue == lastSentTimer) return;
-    lastSentTimer = timerValue;
-    client.doAction(TTS_TIMER_ACTION_ID, { timer: timerValue });
-    ttsTimerLabel.textContent = timerValue + ' min';
-  }
-
-  // Knob jQuery (si chargé)
-  if (window.$ && typeof $.fn.knob === "function" && ttsTimerInput) {
-    $(ttsTimerInput).knob({
-      min: 1,
-      max: 10,
-      width: 48,
-      height: 48,
-      thickness: 0.4,
-      fgColor: "#ffef61",
-      bgColor: "#23262b",
-      inputColor: "#fff",
-      angleOffset: -125,
-      angleArc: 250,
-      displayInput: true,
-      release: function(val) {
-        sendTtsTimer(val);
-      },
-      change: function(val) {
-        ttsTimerLabel.textContent = val + ' min';
+    // === Récupération dynamique de l'ID de l'action TTS Timer Set ===
+    try {
+      const actionsObj = await client.getActions();
+      const ttsTimer = actionsObj.actions.find(a => a.name === "TTS Timer Set");
+      if (ttsTimer) {
+        TTS_TIMER_ACTION_ID = ttsTimer.id;
+      } else {
+        console.warn("Action TTS Timer Set non trouvée !");
       }
-    });
-  } else if (ttsTimerInput) {
-    // Fallback : slider classique
-    ttsTimerInput.addEventListener('input', e => {
-      ttsTimerLabel.textContent = ttsTimerInput.value + ' min';
-    });
-    ttsTimerInput.addEventListener('change', e => {
-      sendTtsTimer(Number(ttsTimerInput.value));
-    });
+    } catch(e) {
+      console.warn("Erreur récupération actions :", e);
+    }
+
+    // === NEW: Récupération de la dernière valeur du cooldown (ttsCooldownMinutes) ===
+    try {
+      const cooldownResp = await client.getGlobal("ttsCooldownMinutes");
+      if (cooldownResp && cooldownResp.status === "ok" && typeof cooldownResp.variable?.value === "number") {
+        // Fix UI knob/slider
+        ttsTimerInput.value = cooldownResp.variable.value;
+        ttsTimerLabel.textContent = cooldownResp.variable.value + ' min';
+        lastSentTimer = cooldownResp.variable.value; // Synchronisation
+        if (window.$ && typeof $.fn.knob === "function" && ttsTimerInput && $(ttsTimerInput).data('knob')) {
+          $(ttsTimerInput).val(cooldownResp.variable.value).trigger('change');
+        }
+      }
+    } catch (e) {
+      console.warn("Erreur récupération du cooldown ttsCooldownMinutes :", e);
+    }
+  },
+  onDisconnect: () => {
+    statusDot.classList.replace('online','offline');
+    viewerCountSpan.textContent = '';
+    viewerCountSpan.title = '';
   }
+});
+
+// === 2-bis) TTS Timer Control ===
+function sendTtsTimer(timerValue) {
+  if (!TTS_TIMER_ACTION_ID) {
+    console.warn("TTS_TIMER_ACTION_ID non chargé !");
+    return; // Attend que l'id soit chargé
+  }
+  if (timerValue == lastSentTimer) return;
+  lastSentTimer = timerValue;
+  client.doAction(TTS_TIMER_ACTION_ID, { timer: timerValue });
+  ttsTimerLabel.textContent = timerValue + ' min';
+}
+
+// Knob jQuery (si chargé)
+if (window.$ && typeof $.fn.knob === "function" && ttsTimerInput) {
+  $(ttsTimerInput).knob({
+    min: 1,
+    max: 10,
+    width: 48,
+    height: 48,
+    thickness: 0.4,
+    fgColor: "#ffef61",
+    bgColor: "#23262b",
+    inputColor: "#fff",
+    angleOffset: -125,
+    angleArc: 250,
+    displayInput: true,
+    release: function(val) {
+      sendTtsTimer(val);
+    },
+    change: function(val) {
+      ttsTimerLabel.textContent = val + ' min';
+    }
+  });
+} else if (ttsTimerInput) {
+  // Fallback : slider classique
+  ttsTimerInput.addEventListener('input', e => {
+    ttsTimerLabel.textContent = ttsTimerInput.value + ' min';
+  });
+  ttsTimerInput.addEventListener('change', e => {
+    sendTtsTimer(Number(ttsTimerInput.value));
+  });
+}
+
 
   // === 3) dispatch events ===
   client.on('*', ({event,data}) => {
