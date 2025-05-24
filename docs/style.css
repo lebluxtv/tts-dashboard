@@ -418,20 +418,35 @@ height: 320px;
   transition: width .3s;
 }
 .tts-candidate-meta {
-  width: 100%;
   display: flex;
-  justify-content: space-between;
-  font-size: 0.93em;
-  margin-top: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 1.05em;
+  margin-top: 3px;
 }
+
 .tts-candidate-user {
-  color: #ff6565;
-  font-weight: 600;
-  max-width: 70px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-family: 'Fira Mono', monospace;
+  font-weight: bold;
+  color: #ff4a58;
+  max-width: 150px;   /* adapte si besoin */
   white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
 }
+
+.tts-candidate-rank {
+  display: inline-block;
+  min-width: 18px;
+  font-weight: bold;
+  color: #ffe54a;
+  text-align: right;
+  margin-right: 4px;
+  font-size: 1.2em;
+}
+
 .tts-candidate-msgs {
   color: #c5fdff;
 }
