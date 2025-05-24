@@ -109,32 +109,36 @@ body {
     align-items: center;
 }
 .timeline-controls button {
-    background: var(--panel);
-    color: var(--accent);
-    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--highlight);
+    border: 2px solid var(--highlight);
     border-radius: 10px;
-    padding: 5px 17px;
-    font-size: 1rem;
+    padding: 5px 20px;
+    font-size: 1.05rem;
     font-weight: bold;
-    letter-spacing: .2px;
-    box-shadow: 0 1px 5px #0003;
+    letter-spacing: .1px;
+    box-shadow: none;
     cursor: pointer;
-    opacity: 0.86;
-    transition: all .15s;
+    opacity: 1;
+    transition: 
+        background .13s,
+        color .13s,
+        border-color .13s,
+        transform .14s;
     outline: none;
 }
 .timeline-controls button.active,
 .timeline-controls button:active {
-    background: var(--accent);
+    background: var(--highlight);
     color: #181a17;
-    opacity: 1;
-    transform: scale(1.09);
-    border-color: #ffd700;
+    border-color: var(--highlight);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px #00fffa33;
 }
-.timeline-controls button:hover:not(.active) {
-    background: #343632;
-    color: #fffbe0;
-    opacity: 1;
+.timeline-controls button:not(.active):hover {
+    background: #182125;
+    color: #1ee6c9;
+    border-color: var(--highlight);
 }
 
 /* ================================
