@@ -117,15 +117,7 @@ async function syncTtsSwitchFromBackend() {
   }
 }
 
-function setTtsAutoReader(enabled) {
-  const method = enabled ? "switchReaderOn" : "switchReaderOff";
-  client.doActionByName("TTS Auto Message Reader Switch ON OFF", {}, method)
-    .then(() => updateTtsSwitchUI(enabled))
-    .catch(e => {
-      updateTtsSwitchUI(!enabled);
-      alert("Erreur lors du changement de l’état du TTS Auto Reader.");
-    });
-}
+
 
 ttsSwitchInput.addEventListener('change', (e) => {
   setTtsAutoReader(ttsSwitchInput.checked);
@@ -184,6 +176,20 @@ syncTtsSwitchFromBackend();
 
   }
 });
+
+function setTtsAutoReader(enabled) {
+  // On envoie "on" ou "off" selon l'état du switch
+  client.doAction({
+    name: "TTS Auto Message Reader Switch ON OFF",
+    args: { mode: enabled ? "on" : "off" }
+  })
+  .then(() => updateTtsSwitchUI(enabled))
+  .catch(e => {
+    updateTtsSwitchUI(!enabled);
+    alert("Erreur lors du changement de l’état du TTS Auto Reader.");
+    console.error(e);
+  });
+}
 
 // === 2-bis) TTS Timer Control ===
 function sendTtsTimer(timerValue) {
