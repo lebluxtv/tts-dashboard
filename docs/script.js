@@ -119,7 +119,7 @@ async function syncTtsSwitchFromBackend() {
 
 function setTtsAutoReader(enabled) {
   const method = enabled ? "switchReaderOn" : "switchReaderOff";
-  client.doActionByName("TTS Auto Message Reader Switch ON / OFF", {}, method)
+  client.doActionByName("TTS Auto Message Reader Switch ON OFF", {}, method)
     .then(() => updateTtsSwitchUI(enabled))
     .catch(e => {
       updateTtsSwitchUI(!enabled);
