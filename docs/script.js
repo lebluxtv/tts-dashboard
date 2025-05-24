@@ -507,26 +507,27 @@ function renderCandidatesPanel(candidates, selectedUser) {
   // Option : limiter à 15 candidats
   const topCandidates = candidates.slice(0, 15);
 
-  ttsCandidatesPanel.innerHTML = `
-    <div class="tts-candidates-grid">
-${topCandidates.map((u, i) => `
-  <div class="tts-candidate${u.user===selectedUser ? ' selected' : ''}">
-    <div class="tts-candidate-bar-outer">
-      <div class="tts-candidate-bar-inner"
-           style="width:${(u.weight/maxWeight*100).toFixed(1)}%;"></div>
-    </div>
-    <div class="tts-candidate-meta">
-      <span class="tts-candidate-rank">${i+1}</span>
-      <span class="tts-candidate-user">${u.user}</span>
-      <span class="tts-candidate-msgs">${u.messages} msg</span>
-      <span class="tts-candidate-weight">${u.weight.toFixed(3)}</span>
-    </div>
+ttsCandidatesPanel.innerHTML = `
+  <div class="tts-candidates-grid">
+    ${topCandidates.map((u, i) => `
+      <div class="tts-candidate${u.user===selectedUser ? ' selected' : ''}">
+        <div class="tts-candidate-user">${u.user}</div>
+        <div class="tts-candidate-bar-row">
+          <span class="tts-candidate-rank">${i+1}</span>
+          <div class="tts-candidate-bar-outer">
+            <div class="tts-candidate-bar-inner"
+                 style="width:${(u.weight/maxWeight*100).toFixed(1)}%;"></div>
+          </div>
+        </div>
+        <div class="tts-candidate-meta">
+          <span class="tts-candidate-msgs">${u.messages} msg</span>
+          <span class="tts-candidate-weight">${u.weight.toFixed(3)}</span>
+        </div>
+      </div>
+    `).join('')}
   </div>
-`).join('')}
+`;
 
-    </div>
-  `;
-}
 
   function drawIcon(type, ctx, x, H){
     if (type==='tts')      ctx.arc(x,H-18, 8,0,2*Math.PI);
