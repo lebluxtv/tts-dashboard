@@ -99,7 +99,7 @@ const ttsSwitchLabelText = ttsSwitchLabel.querySelector('.switch-label-text');
 function updateTtsSwitchUI(realValue) {
   if (typeof realValue !== "boolean") return;
   ttsSwitchInput.checked = realValue;
-  ttsSwitchLabelText.textContent = realValue ? 'TTS ACTIVÉ' : 'TTS DÉSACTIVÉ';
+  ttsSwitchLabelText.textContent = realValue ? 'TTS ON' : 'TTS OFF';
   ttsSwitchLabel.style.opacity = realValue ? '1' : '0.5';
 }
 
