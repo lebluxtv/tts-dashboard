@@ -502,10 +502,15 @@ function renderCandidatesPanel(candidates, selectedUser) {
     return;
   }
 
-  // Cherche le max weight pour la normalisation
-  const maxWeight = Math.max(...candidates.map(u => u.weight));
+
   // Option : limiter à 15 candidats
-  const topCandidates = candidates.slice(0, 15);
+  const topCandidates = candidates
+  .slice() // copie pour ne pas muter l’original
+  .sort((a, b) => b.weight - a.weight)
+  .slice(0, 15);
+  // Cherche le max weight sur CEUX affichés
+  const maxWeight = Math.max(...topCandidates.map(u => u.weight)) || 1; // pour éviter division par 0
+
 
   ttsCandidatesPanel.innerHTML = `
     <div class="tts-candidates-grid">
