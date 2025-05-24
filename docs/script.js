@@ -604,12 +604,12 @@ function drawLabel(ev, ctx, x, idx){
     usersPerMinSpan.textContent = new Set(rec.map(m=>m.user)).size;
   },10000);
 
-  // msgs/s & users/s
+  /*// msgs/s & users/s
   setInterval(()=>{
     const oneSecAgo = Date.now()-1000;
     const lastSec = chatBuffer.filter(m=>m.time>=oneSecAgo);
     document.querySelector('.osc-msg').textContent = lastSec.length;
     document.querySelector('.osc-users').textContent = new Set(lastSec.map(m=>m.user)).size;
   },1000);
-
+*/
 });
