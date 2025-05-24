@@ -504,63 +504,65 @@ function renderCandidatesPanel(candidates, selectedUser) {
 
   // Cherche le max weight pour la normalisation
   const maxWeight = Math.max(...candidates.map(u => u.weight));
-  // Option : limiter à 15 candidats
+  // Option : limiter à 15 candidats
   const topCandidates = candidates.slice(0, 15);
 
-ttsCandidatesPanel.innerHTML = `
-  <div class="tts-candidates-grid">
-    ${topCandidates.map((u, i) => `
-      <div class="tts-candidate${u.user===selectedUser ? ' selected' : ''}">
-        <div class="tts-candidate-user">${u.user}</div>
-        <div class="tts-candidate-bar-row">
-          <span class="tts-candidate-rank">${i+1}</span>
-          <div class="tts-candidate-bar-outer">
-            <div class="tts-candidate-bar-inner"
-                 style="width:${(u.weight/maxWeight*100).toFixed(1)}%;"></div>
+  ttsCandidatesPanel.innerHTML = `
+    <div class="tts-candidates-grid">
+      ${topCandidates.map((u, i) => `
+        <div class="tts-candidate${u.user===selectedUser ? ' selected' : ''}">
+          <div class="tts-candidate-user">${u.user}</div>
+          <div class="tts-candidate-bar-row">
+            <span class="tts-candidate-rank">${i+1}</span>
+            <div class="tts-candidate-bar-outer">
+              <div class="tts-candidate-bar-inner"
+                   style="width:${(u.weight/maxWeight*100).toFixed(1)}%;"></div>
+            </div>
+          </div>
+          <div class="tts-candidate-meta">
+            <span class="tts-candidate-msgs">${u.messages} msg</span>
+            <span class="tts-candidate-weight">${u.weight.toFixed(3)}</span>
           </div>
         </div>
-        <div class="tts-candidate-meta">
-          <span class="tts-candidate-msgs">${u.messages} msg</span>
-          <span class="tts-candidate-weight">${u.weight.toFixed(3)}</span>
-        </div>
-      </div>
-    `).join('')}
-  </div>
-`;
+      `).join('')}
+    </div>
+  `;
+}
 
 
-  function drawIcon(type, ctx, x, H){
-    if (type==='tts')      ctx.arc(x,H-18, 8,0,2*Math.PI);
-    else if (type==='chat')ctx.arc(x,H-12, 4,0,2*Math.PI);
-    else if (type==='Follow')ctx.arc(x,H-18,6,0,2*Math.PI);
-    else ctx.rect(x-6,H-25,13,13);
+// --- Les fonctions drawIcon et drawLabel SONT EN DEHORS ! ---
+function drawIcon(type, ctx, x, H){
+  if (type==='tts')      ctx.arc(x,H-18, 8,0,2*Math.PI);
+  else if (type==='chat')ctx.arc(x,H-12, 4,0,2*Math.PI);
+  else if (type==='Follow')ctx.arc(x,H-18,6,0,2*Math.PI);
+  else ctx.rect(x-6,H-25,13,13);
+}
+
+function drawLabel(ev, ctx, x, idx){
+  const cfg = labelConfig[ev.type]||labelConfig.default;
+  const lineHeight = parseInt(cfg.font,10)+2;
+  const baseY = cfg.y + idx*lineHeight*2;
+  ctx.font = cfg.font;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = cfg.color;
+
+  if (ev.type==='TimedAction'&&ev.name){
+    ctx.fillText(ev.type,x,baseY);
+    ctx.fillText(ev.name,x,baseY+lineHeight);
   }
-
-  function drawLabel(ev, ctx, x, idx){
-    const cfg = labelConfig[ev.type]||labelConfig.default;
-    const lineHeight = parseInt(cfg.font,10)+2;
-    const baseY = cfg.y + idx*lineHeight*2;
-    ctx.font = cfg.font;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = cfg.color;
-
-    if (ev.type==='TimedAction'&&ev.name){
-      ctx.fillText(ev.type,x,baseY);
-      ctx.fillText(ev.name,x,baseY+lineHeight);
-    }
-    else if (ev.type==='Follow'&&ev.displayName){
-      ctx.fillText(ev.type,x,baseY);
-      ctx.fillText(ev.displayName,x,baseY+lineHeight);
-    }
-    else if (ev.type==='Cheer'&&ev.message&&ev.message.hasBits){
-      ctx.fillText(ev.type,x,baseY);
-      ctx.fillText(`${ev.message.bits} bits`,x,baseY+lineHeight);
-      ctx.fillText(ev.message.displayName,x,baseY+lineHeight*2);
-    }
-    else {
-      ctx.fillText(ev.type,x,baseY);
-    }
+  else if (ev.type==='Follow'&&ev.displayName){
+    ctx.fillText(ev.type,x,baseY);
+    ctx.fillText(ev.displayName,x,baseY+lineHeight);
   }
+  else if (ev.type==='Cheer'&&ev.message&&ev.message.hasBits){
+    ctx.fillText(ev.type,x,baseY);
+    ctx.fillText(`${ev.message.bits} bits`,x,baseY+lineHeight);
+    ctx.fillText(ev.message.displayName,x,baseY+lineHeight*2);
+  }
+  else {
+    ctx.fillText(ev.type,x,baseY);
+  }
+}
 
   // === final init ===
   renderChat();
