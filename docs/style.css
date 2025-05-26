@@ -1,5 +1,5 @@
 :root {
-    --bg: #e1d6c3;          /* beige pierre */
+    --bg: #5e481b;          /* beige pierre */
     --panel: #4b3120;       /* brun bois foncé */
     --highlight: #fff5cf;   /* blanc cassé - titres/highlight */
     --accent: #ceb066;      /* doré (texte JB.CORP) */
@@ -17,7 +17,8 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: var(--bg);
+    background: var(--bg) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    border: 2px solid var(--border);
     color: var(--text);
     font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
 }
