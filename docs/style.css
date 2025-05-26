@@ -17,7 +17,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: var(--bg) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+    background: var(--bg) url('https://www.transparenttextures.com/patterns/bright-squares.png');
     border: 2px solid var(--border);
     color: var(--text);
     font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
