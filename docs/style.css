@@ -318,9 +318,9 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 .timeline-section {
-    flex: 0 0 200px; /* Fixe la hauteur du graph (ajuste si besoin) */
+    /*flex: 0 0 200px; /* Fixe la hauteur du graph (ajuste si besoin) */
     min-height: 0;
-    max-height: 50vh;  /* pour éviter un trop gros graphe sur petits écrans */
+    /*max-height: 50vh;  /* pour éviter un trop gros graphe sur petits écrans */
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -329,9 +329,9 @@ input:checked + .slider:before { transform: translateX(18px); }
 
 #oscilloscope {
     width: 100%!important;
-    height: 100%!important;
-    min-height: 0;
-    max-height: 100%;
+     height: 160px!important;
+    min-height: 80px;
+    max-height: 240px;
     background: #191b1d;
     border-radius: 10px;
     box-shadow: 0 2px 24px #0007;
