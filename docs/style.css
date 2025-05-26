@@ -1,32 +1,30 @@
 :root {
-    --bg: #5e481b;          /* beige pierre */
-    --panel: #4b3120;       /* brun bois foncé */
-    --highlight: #fff5cf;   /* blanc cassé - titres/highlight */
+    --bg: #5e481b;          /* fond principal “bois mat” */
+    --panel: #4b3120;       /* panneau bois foncé */
+    --highlight: #fff5cf;   /* blanc cassé doré */
     --accent: #ceb066;      /* doré (texte JB.CORP) */
-    --chatbg: #6a4625;      /* bois plus clair, pour chat */
-    --border: #36230e;      /* brun foncé pour bordures */
-    --text: #241b10;        /* brun très sombre (ombre/texte) */
-    --event-feed-bg: #d4c3a5; /* fond plus clair pour event feed */
-    --event-feed-border: #ceb066; /* accent doré en bordure */
+    --chatbg: #6a4625;      /* bois plus clair */
+    --border: #36230e;      /* brun très foncé pour bordures */
+    --text: #241b10;        /* texte, très sombre */
+    --event-feed-bg: #d4c3a5;   /* feed event: beige clair */
+    --event-feed-border: #ceb066; /* bordure dorée event */
 }
 
-/* ================================
-   GLOBAL
-   ================================ */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
     background: var(--bg) url('https://www.transparenttextures.com/patterns/bright-squares.png');
-    border: 2px solid var(--border);
     color: var(--text);
     font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
 }
+
 body {
     width: 100vw;
     min-height: 100vh;
     margin: 0;
     overflow: hidden;
+    border: 2px solid var(--border);
 }
 
 /* ================================
@@ -46,7 +44,7 @@ body {
     margin: 0 12px 0 0;
     letter-spacing: 1px;
     white-space: nowrap;
-    text-shadow: 2px 2px 0 #ceb06633;
+    text-shadow: 2px 2px 0 #ceb06630;
 }
 #status-dot {
     width: 14px; height: 14px;
@@ -346,9 +344,10 @@ input:checked + .slider:before { transform: translateX(18px); }
     min-height: 80px;
     max-height: 240px;
     background: var(--bg) url('https://www.transparenttextures.com/patterns/cream-paper.png');
-background-blend-mode: multiply;
+    background-blend-mode: multiply;
     border-radius: 10px;
     box-shadow: 0 2px 24px #ceb06644;
+    border: 2px solid var(--border);
     display: block;
     margin: 0; padding: 0;
 }
