@@ -511,21 +511,23 @@ input:checked + .slider:before { transform: translateX(18px); }
    RESPONSIVE
    ================================ */
 @media (max-width:900px) {
-    .dashboard-vertical,
-    #tts-panel,
-    .timeline-topbar {
-        width:99vw; max-width:99vw;
-    }
-    #oscilloscope { min-width:99vw; }
-    #tts-header, #tts-progress { max-width:99vw; }
-    .header-bar h1 { font-size:1.2rem; }
-    /* Nouveau responsive grid */
     .dashboard-main {
+        display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 220px 1fr 220px;
+        grid-template-rows: 180px 320px 180px;
         height: auto;
+        min-height: 0;
     }
-    .chat-container { grid-column: 1; grid-row: 1; }
-    #oscilloscope   { grid-column: 1; grid-row: 2; min-width: 0; }
-    .tts-info-container { grid-column: 1; grid-row: 3; }
+    .chat-container { grid-column: 1; grid-row: 1; min-height: 0; }
+    #oscilloscope {
+        grid-column: 1; grid-row: 2;
+        width: 100%!important;
+        height: 320px!important;
+        min-width: 0;
+        min-height: 0;
+        max-height: 320px;
+        box-sizing: border-box;
+        /* Ajoute ça pour forcer la taille du canvas en responsive ! */
+    }
+    .tts-info-container { grid-column: 1; grid-row: 3; min-height: 0; }
 }
