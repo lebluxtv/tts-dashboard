@@ -73,10 +73,10 @@ body {
 }
 .file-btn { cursor: pointer; }
 .header-bar > * { vertical-align: middle; }
-
 /* ================================
    Switch ON / OFF
    ================================ */
+
 .switch {
   display: inline-flex;
   align-items: center;
@@ -307,31 +307,36 @@ input:checked + .slider:before { transform: translateX(18px); }
     height: 88vh;
     min-height: 0;
 }
+
 .dashboard-main {
-    flex: 1 1 0%;
     display: flex;
     flex-direction: column;
+    min-height: 0; /* Important ! */
+    height: 100%;
+    flex: 1 1 0%;
     gap: 0;
-    min-height: 0;
 }
 
 .timeline-section {
-  flex: 0 0 320px;
-  height: 320px;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  min-height: 0;
+    /*flex: 0 0 200px; /* Fixe la hauteur du graph (ajuste si besoin) */
+    min-height: 0;
+    /*max-height: 50vh;  /* pour éviter un trop gros graphe sur petits écrans */
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
 }
 
 #oscilloscope {
-    width:100%!important; height:100%!important;
+    width: 100%!important;
+     height: 160px!important;
+    min-height: 80px;
+    max-height: 240px;
     background: #191b1d;
     border-radius: 10px;
     box-shadow: 0 2px 24px #0007;
-    display:block;
-    margin:0; padding:0;
+    display: block;
+    margin: 0; padding: 0;
 }
 
 /* ================================
@@ -355,23 +360,24 @@ input:checked + .slider:before { transform: translateX(18px); }
 .event-feed.show { display:block; }
 
 /* ================================
-   SPLIT CHAT / TTS INFO (hauteur FIXE !)
+   SPLIT CHAT / TTS INFO (correction alignement & taille)
    ================================ */
 .chat-tts-section {
+    flex: 0 0 auto;
+    min-height: 0;
+    max-height: calc(100% - 320px); /* Hauteur max = reste après le graph */
+    overflow: auto;
     display: flex;
     flex-direction: row;
     gap: 18px;
-    margin: 100px 14px 14px 14px;
-    height: 380px;            /* Hauteur FIXE */
-    min-height: 380px;
-    max-height: 380px;
+    margin: 20px 14px 14px 14px;
+    /* height: 380px;  // À enlever pour laisser la place */
 }
 .chat-container,
 .tts-info-container {
     flex: 1 1 0;
     min-width: 0;
     min-height: 0;
-    height: 100%;             /* Hauteur 100% du parent */
     max-height: 100%;
     background: var(--chatbg);
     border-radius: 10px;
@@ -524,15 +530,14 @@ input:checked + .slider:before { transform: translateX(18px); }
     .header-bar h1 { font-size:1.2rem; }
     .chat-tts-section {
         flex-direction: column;
+        height: auto;
+        max-height: none;
         margin: 12px 7px 7px 7px;
-        height: 340px;     /* moins haut sur mobile */
-        min-height: 340px;
-        max-height: 340px;
     }
     .chat-container,
     .tts-info-container {
-        height: 50%;
-        max-height: 50%;
-        min-height: 0;
+        min-height: 120px;
+        height: 220px;
+        max-height: 100%;
     }
 }
