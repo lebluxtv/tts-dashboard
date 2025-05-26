@@ -344,7 +344,8 @@ input:checked + .slider:before { transform: translateX(18px); }
     height: 160px!important;
     min-height: 80px;
     max-height: 240px;
-    background: #bda478;
+    background: var(--bg) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+background-blend-mode: multiply;
     border-radius: 10px;
     box-shadow: 0 2px 24px #ceb06644;
     display: block;
