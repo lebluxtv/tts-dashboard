@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>TTS Auto Message Reader - Dashboard</title>
-<link rel="icon" href="favicon.ico" sizes="any">
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+    <!-- Style principal -->
     <link rel="stylesheet" href="style.css">
     <!-- jQuery nécessaire pour le knob -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- jQuery Knob -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-knob/1.2.13/jquery.knob.min.js"></script>
+    <!-- Smoothie.js modifié -->
     <script src="smoothie.mod.js"></script>
+    <!-- Streamer.bot Client -->
     <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
 </head>
 <body>
     <div class="dashboard-vertical">
+        <!-- HEADER -->
         <header class="dashboard-header">
             <div class="header-bar">
                 <h1>TTS Auto Message Reader</h1>
                 <span id="status-dot" class="offline"></span>
                 <span id="viewer-count"></span>
                 <div class="header-metrics">
-
                     <span><span id="osc-msg-min">0</span> msgs/min</span>
                     <span><span id="osc-users-min">0</span> users/min</span>
                 </div>
@@ -32,71 +34,70 @@
                     📂 Charger un log
                     <input type="file" id="load-session" accept=".json" style="display:none;">
                 </label>
-                <!-- Contrôle du timer via knob -->
                 <div class="timer-control">
                     <input type="text" id="tts-timer" value="3" min="1" max="10">
                     <span id="tts-timer-label">3 min</span>
                 </div>
-<label class="switch" id="tts-switch-label">
-  <input type="checkbox" id="tts-switch" />
-  <span class="slider"></span>
-  <span class="switch-label-text">TTS ACTIVÉ</span>
-</label>
+                <label class="switch" id="tts-switch-label">
+                    <input type="checkbox" id="tts-switch" />
+                    <span class="slider"></span>
+                    <span class="switch-label-text">TTS ACTIVÉ</span>
+                </label>
             </div>
         </header>
 
+        <!-- TTS PANEL PRINCIPAL -->
         <div id="tts-panel">
             <div id="tts-header">Aucun TTS</div>
             <div id="tts-progress"><div class="bar" style="width:100%"></div></div>
         </div>
 
+        <!-- BARRE DU HAUT : timeline + filtres -->
+        <div class="dashboard-main-header">
+            <div class="timeline-topbar">
+                <div class="timeline-controls">
+                    <button data-scale="60">1 min</button>
+                    <button data-scale="300">5 min</button>
+                    <button data-scale="600">10 min</button>
+                </div>
+                <div id="event-filters" class="event-filters">
+                    <!-- Les boutons seront injectés par JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- LAYOUT PRINCIPAL : GRID 3 COLONNES -->
         <main class="dashboard-main">
-            <section class="timeline-section">
-                <div class="timeline-topbar">
-                    <div class="timeline-controls">
-                        <button data-scale="60">1 min</button>
-                        <button data-scale="300">5 min</button>
-                        <button data-scale="600">10 min</button>
-
-                    </div>
-                    <div id="event-filters" class="event-filters">
-                        <!-- Les boutons seront injectés par JS -->
-                    </div>
+            <!-- Bloc Chat à gauche -->
+            <div class="chat-container">
+                <div id="chat-log"></div>
+            </div>
+            <!-- Graphe central -->
+            <canvas id="oscilloscope"></canvas>
+            <!-- Bloc détails TTS à droite -->
+            <div class="tts-info-container">
+                <h2>Détails du dernier TTS</h2>
+                <div id="tts-info">
+                    <p>Aucun TTS sélectionné</p>
+                    <!-- On y injectera via JS :
+                         - freshnessScore
+                         - activityScore
+                         - tokenBoost
+                         - weight
+                         - etc.
+                    -->
                 </div>
-                <canvas id="oscilloscope"></canvas>
-            </section>
-
-            <section id="event-feed" class="event-feed"></section>
-
-            <!-- ==== NOUVELLE SECTION SPLIT CHAT / TTS INFO ==== -->
-            <section class="chat-tts-section">
-                <!-- encart chat -->
-                <div class="chat-container">
-                    <div id="chat-log"></div>
+                <div id="tts-candidates-panel">
+                    <!-- Les jauges des 15 candidats TTS seront injectées ici via JS -->
                 </div>
-                <!-- encart infos TTS -->
-                <div class="tts-info-container">
-                    <h2>Détails du dernier TTS</h2>
-                    <div id="tts-info">
-                        <p>Aucun TTS sélectionné</p>
-                        <!-- On y injectera via JS :
-                             - freshnessScore
-                             - activityScore
-                             - tokenBoost
-                             - weight
-                             - etc.
-                        -->
-                    </div>
-    <div id="tts-candidates-panel">
-        <!-- Les jauges des 15 candidats TTS seront injectées ici via JS -->
-    </div>
-                </div>
-            </section>
-            <!-- =============== FIN SPLIT =============== -->
+            </div>
         </main>
+
+        <!-- Event feed flottant (optionnel, affiché en JS si besoin) -->
+        <section id="event-feed" class="event-feed"></section>
+
     </div>
-
+    <!-- Script principal -->
     <script src="script.js"></script>
-
 </body>
 </html>
