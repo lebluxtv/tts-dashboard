@@ -318,7 +318,7 @@ input:checked + .slider:before { transform: translateX(18px); }
 }
 
 .timeline-section {
-    flex: 0 0 320px; /* Fixe la hauteur du graph (ajuste si besoin) */
+    flex: 0 0 200px; /* Fixe la hauteur du graph (ajuste si besoin) */
     min-height: 0;
     max-height: 50vh;  /* pour éviter un trop gros graphe sur petits écrans */
     display: flex;
