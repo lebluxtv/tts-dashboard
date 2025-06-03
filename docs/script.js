@@ -492,6 +492,18 @@ timestampFormatter: date => {
       if (eventsBuffer.length>1000) eventsBuffer.shift();
 
 // détails TTS
+
+// === PATCH affichage mode TTS ===
+const ttsModeDiv = document.getElementById('tts-mode-info'); // <- ici
+if (payload.bypass === true) {
+  ttsModeDiv.innerHTML = '<span style="color:#ffe761; font-weight:bold;">Mode BYPASS silence</span>';
+} else if (payload.bypass === false) {
+  ttsModeDiv.innerHTML = '<span style="color:#73fa91; font-weight:bold;">Mode normal</span>';
+} else {
+  ttsModeDiv.innerHTML = '<span style="color:#888;">Mode inconnu</span>';
+}
+// === FIN PATCH mode TTS ===
+
 ttsInfoDiv.innerHTML = '';
 if (Array.isArray(payload.candidatesPanel)){
   const entry = payload.candidatesPanel.find(e=>e.user===ttsUser);
