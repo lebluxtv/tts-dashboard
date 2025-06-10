@@ -238,6 +238,7 @@ if (window.$ && typeof $.fn.knob === "function" && ttsTimerInput) {
 
   // === 3) dispatch events ===
   client.on('*', ({event,data}) => {
+console.log('[STREAMERBOT EVENT]', event, data);
     let type = null;
     const now = Date.now();
     if (event.source==='Twitch') {
